@@ -6,14 +6,31 @@ I followed https://webassembly.org/getting-started/developers-guide/
 
 tl;dr:
 
-Setup:
-1. `source ./emsdk_env.sh`
-2. Run webserver `emrun --no_browser --port 8080 .`
+### Setup (once per day)
 
-Dev loop:
-1. edit hello.c
-2. `emcc hello.c -o hello.html -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2`
-3. Refresh http://localhost:8080/hello.html
+1. Get cmdline aliases:
+```
+source ~/projects/emsdk/emsdk_env.sh
+```
+2. Run webserver:
+```
+emrun --no_browser --port 8080 .
+```
+
+### Dev loop (once per change)
+
+1. Edit hello.c
+2. Compile the code:
+```
+emcc hello.c -o hello.html -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2
+```
+3. Refresh:
+http://localhost:8080/hello.html
+
+## Todo
+
+1. Get basic sdl2 app up (draw a square onscreen?), working on mac only
+2. Then, switch out compiler for webasm and hope that wokrs
 
 ## misc notes
 
@@ -30,6 +47,3 @@ works to compile sdl (no webasm yet)
   gcc hello.c -o a.out -I ~/Library/Frameworks/SDL2.framework/Headers -F ~/Library/Frameworks -framework SDL2
 
 `emcc --help | bat` has some interesting profiling option (search "profil")
-
-
-
