@@ -22,7 +22,7 @@ emrun --no_browser --port 8080 .
 1. Edit hello.c
 2. Compile the code:
 ```
-emcc hello.c -o hello.html -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2
+emcc hello.c -o hello.html -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 --preload-file data --use-preload-plugins
 ```
 3. Refresh:
 http://localhost:8080/hello.html
