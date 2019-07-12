@@ -27,11 +27,21 @@ bool init() {
   return true;
 }
 
+SDL_Surface* loadSurface(char* path) {
+  SDL_Surface* out;
+  out = SDL_LoadBMP(path);
+  if (out == NULL) {
+    printf("Could not load image %s: SDL_Error: %s\n", path, SDL_GetError());
+    return NULL;
+  }
+  return out;
+}
+
 SDL_Surface* helloSurface = NULL;
 bool loadMedia() {
-  helloSurface = SDL_LoadBMP("hello_world.bmp");
+  helloSurface = loadSurface("hello_world.bmp");
   if (helloSurface == NULL) {
-    printf("Could not load image %s: SDL_Error: %s\n", "hello_world.bmp", SDL_GetError());
+    printf("Could not load media");
     return false;
   }
   return true;
@@ -44,25 +54,42 @@ void close() {
   SDL_Quit();
 }
 
+void game() {
+  bool quit = false;
+  SDL_Event e;
+  while (!quit) {
+    while (SDL_PollEvent(&e) != 0) {
+      printf("Event code: %d\n", e.type);
+      if (e.type == SDL_QUIT) {
+        quit = true;
+      }
+    }
+
+    // all events for this pseudo-frame have now been processed
+    SDL_BlitSurface(helloSurface, NULL, screenSurface, NULL);
+    SDL_UpdateWindowSurface(window);
+  }
+}
+
+// void game() {
+//   SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0x00, 0xFF));
+//   SDL_UpdateWindowSurface(window);
+
+//   SDL_Delay(3000);
+// }
+
 int main(int argc, char** argv) {
-  bool success;
-  success = init();
-  if (!success) {
+  if (!init()) {
     printf("Failed to init\n");
     return 1;
   }
 
-  success = loadMedia();
-  if (!success) {
+  if (!loadMedia()) {
     printf("Failed to load media\n");
     return 1;
   }
 
-  SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0x00, 0xFF));
-  SDL_BlitSurface(helloSurface, NULL, screenSurface, NULL);
-  SDL_UpdateWindowSurface(window);
-
-  SDL_Delay(3000);
+  game();
 
   close();
 }
