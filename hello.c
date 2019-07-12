@@ -11,7 +11,8 @@ SDL_Surface* screenSurface = NULL;
 
 bool init() {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    printf("SDL failed to initialize: SDL_Error %s\n", SDL_GetError());
+    printf("SDL_Error: %s\n", SDL_GetError());
+    printf("Could not initialize SDL\n");
     return false;
   }
 
@@ -19,7 +20,8 @@ bool init() {
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
     SDL_WINDOW_SHOWN);
   if (window == NULL) {
-    printf("Could not create window: SDL_Error %s\n", SDL_GetError());
+    printf("SDL_Error: %s\n", SDL_GetError());
+    printf("Could not create window\n");
     return false;
   }
 
@@ -28,22 +30,17 @@ bool init() {
 }
 
 SDL_Surface* loadSurface(char* path) {
-  SDL_Surface* out;
-  out = SDL_LoadBMP(path);
+  SDL_Surface* out = SDL_LoadBMP(path);
   if (out == NULL) {
-    printf("Could not load image %s: SDL_Error: %s\n", path, SDL_GetError());
-    return NULL;
+    printf("SDL_Error: %s\n", SDL_GetError());
+    printf("Could not load surface %s\n", path);
   }
   return out;
 }
 
 SDL_Surface* helloSurface = NULL;
 bool loadMedia() {
-  helloSurface = loadSurface("hello_world.bmp");
-  if (helloSurface == NULL) {
-    printf("Could not load media");
-    return false;
-  }
+  if (!(helloSurface = loadSurface("hello_world.bmp"))) return false;
   return true;
 }
 
