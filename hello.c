@@ -30,12 +30,22 @@ bool init() {
 }
 
 SDL_Surface* loadSurface(char* path) {
-  SDL_Surface* out = SDL_LoadBMP(path);
-  if (out == NULL) {
+  SDL_Surface* loadedSfc = SDL_LoadBMP(path);
+  if (loadedSfc == NULL) {
     printf("SDL_Error: %s\n", SDL_GetError());
     printf("Could not load surface %s\n", path);
+    return NULL;
   }
-  return out;
+  SDL_Surface* optimizedSfc = SDL_ConvertSurface(loadedSfc, screenSurface->format, 0);
+  if (optimizedSfc == NULL) {
+    printf("SDL_Error: %s\n", SDL_GetError());
+    printf("Could not optimize surface %s\n", path);
+    printf("Recovering...\n");
+    return loadedSfc;
+  }
+
+  SDL_FreeSurface(loadedSfc);
+  return optimizedSfc;
 }
 
 SDL_Surface* helloSurface = NULL;
@@ -56,14 +66,31 @@ void game() {
   SDL_Event e;
   while (!quit) {
     while (SDL_PollEvent(&e) != 0) {
-      printf("Event code: %d\n", e.type);
+      // printf("Event code: %d\n", e.type);
       if (e.type == SDL_QUIT) {
         quit = true;
+      } else if (e.type == SDL_KEYDOWN) {
+        if (e.key.keysym.sym == SDLK_UP) {
+          printf("Pressed up\n");
+        } else if (e.key.keysym.sym == SDLK_LEFT) {
+          printf("Pressed left\n");
+        } else if (e.key.keysym.sym == SDLK_RIGHT) {
+          printf("Pressed right\n");
+        } else if (e.key.keysym.sym == SDLK_DOWN) {
+          printf("Pressed down\n");
+        }
       }
     }
 
     // all events for this pseudo-frame have now been processed
-    SDL_BlitSurface(helloSurface, NULL, screenSurface, NULL);
+
+    SDL_Rect stretchRect;
+    stretchRect.x = 0;
+    stretchRect.y = 0;
+    stretchRect.w = SCREEN_WIDTH/2;
+    stretchRect.h = SCREEN_HEIGHT/2;
+    SDL_BlitScaled(helloSurface, NULL, screenSurface, &stretchRect);
+
     SDL_UpdateWindowSurface(window);
   }
 }
