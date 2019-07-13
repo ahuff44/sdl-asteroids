@@ -1,6 +1,6 @@
 # WebAssembly Hello World
 
-## Dev instructions
+## Emscripten Dev instructions
 
 I followed https://webassembly.org/getting-started/developers-guide/
 
@@ -26,6 +26,15 @@ emcc hello.c -o hello.html --preload-file data --use-preload-plugins -s WASM=1 -
 ```
 3. Refresh:
 http://localhost:8080/hello.html
+
+## Local (C) Dev instructions
+
+```
+gcc hello.c -I ~/Library/Frameworks/SDL2.framework/Headers -F ~/Library/Frameworks -framework SDL2
+./a.out
+```
+
+
 
 ## Todo
 

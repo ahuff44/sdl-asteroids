@@ -9,7 +9,7 @@
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
-const int TARGET_FPS = 30;
+const int TARGET_TICK_INTERVAL = 1000 / 30;
 
 SDL_Window* window = NULL;
 SDL_Surface* screenSurface = NULL;
@@ -67,9 +67,14 @@ void closeGame() {
 }
 
 Uint32 timeUntil(Uint32 target) {
-  // TODO
   Uint32 now = SDL_GetTicks();
-  return 0;
+  if (target <= now) {
+    printf("idle time: 0\n");
+    return 0;
+  } else {
+    printf("idle time: %d\n", target - now);
+    return target - now;
+  }
 }
 
 bool _quitGame = false;
@@ -118,14 +123,15 @@ void runForOneFrame() {
 void runGame() {
 #ifdef __EMSCRIPTEN__
   // void emscripten_set_main_loop(em_callback_func func, int fps, int simulate_infinite_loop);
-  emscripten_set_main_loop(runForOneFrame, TARGET_FPS, 1);
+  emscripten_set_main_loop(runForOneFrame, 0, 1);
 #else
-  Uint32 nextFrameTime = SDL_GetTicks();
+  Uint32 frameStartTime;
   while (1) {
+    frameStartTime = SDL_GetTicks();
     runForOneFrame();
     if (_quitGame) break;
     // Delay to keep frame rate constant (using SDL)
-    SDL_Delay(timeUntil(nextFrameTime));
+    SDL_Delay(timeUntil(frameStartTime + TARGET_TICK_INTERVAL));
   }
 #endif
 }
