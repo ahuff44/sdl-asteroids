@@ -103,6 +103,8 @@ void runForOneFrame() {
 
   // all events for this pseudo-frame have now been processed
 
+  // SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0x00, 0xFF));
+
   SDL_Rect stretchRect;
   stretchRect.x = 0;
   stretchRect.y = 0;
