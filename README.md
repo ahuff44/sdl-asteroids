@@ -37,8 +37,11 @@ gcc hello.c -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Framewor
 
 ## Todo
 
-1. Get basic sdl2 app up (draw a square onscreen?), working on mac only
-2. Then, switch out compiler for webasm and hope that wokrs
+* Set up proper makefile; shouldn't be too hard
+* Do GPU sections of tutorial: (skipped)
+  http://lazyfoo.net/tutorials/SDL/07_texture_loading_and_rendering/index.php
+  http://lazyfoo.net/tutorials/SDL/08_geometry_rendering/index.php
+  http://lazyfoo.net/tutorials/SDL/09_the_viewport/index.php
 
 ## misc notes
 
