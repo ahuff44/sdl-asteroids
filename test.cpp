@@ -9,7 +9,12 @@ And this works in-browser:
   emcc test.cpp -o test.html -s USE_SDL=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1
   (then go to localhost:8080/test.html)
 
-the DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR is unnecessary, btw
+update: the DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR is unnecessary
+update:
+  this command (very very closely mirrors hello.c) works
+    emcc test.cpp -o test.html --preload-file data --use-preload-plugins -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1
+  so the problem must be in the code/asset bundling?
+
 */
 
 #include <stdio.h>
