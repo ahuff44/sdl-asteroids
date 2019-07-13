@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+
+import subprocess
+from sys import argv
+
+def sh(cmdstr):
+  subprocess.call(cmdstr.split(' '))
+
+links = [
+  "http://lazyfoo.net/tutorials/SDL/01_hello_SDL/index.php",
+  "http://lazyfoo.net/tutorials/SDL/02_getting_an_image_on_the_screen/index.php",
+  "http://lazyfoo.net/tutorials/SDL/03_event_driven_programming/index.php",
+  "http://lazyfoo.net/tutorials/SDL/04_key_presses/index.php",
+  "http://lazyfoo.net/tutorials/SDL/05_optimized_surface_loading_and_soft_stretching/index.php",
+  "http://lazyfoo.net/tutorials/SDL/06_extension_libraries_and_loading_other_image_formats/index.php",
+  "http://lazyfoo.net/tutorials/SDL/07_texture_loading_and_rendering/index.php",
+  "http://lazyfoo.net/tutorials/SDL/08_geometry_rendering/index.php",
+  "http://lazyfoo.net/tutorials/SDL/09_the_viewport/index.php",
+  "http://lazyfoo.net/tutorials/SDL/10_color_keying/index.php",
+  "http://lazyfoo.net/tutorials/SDL/11_clip_rendering_and_sprite_sheets/index.php",
+  "http://lazyfoo.net/tutorials/SDL/12_color_modulation/index.php",
+  "http://lazyfoo.net/tutorials/SDL/13_alpha_blending/index.php",
+  "http://lazyfoo.net/tutorials/SDL/14_animated_sprites_and_vsync/index.php",
+  "http://lazyfoo.net/tutorials/SDL/15_rotation_and_flipping/index.php",
+  "http://lazyfoo.net/tutorials/SDL/16_true_type_fonts/index.php",
+  "http://lazyfoo.net/tutorials/SDL/17_mouse_events/index.php",
+  "http://lazyfoo.net/tutorials/SDL/18_key_states/index.php",
+  "http://lazyfoo.net/tutorials/SDL/19_gamepads_and_joysticks/index.php",
+  "http://lazyfoo.net/tutorials/SDL/20_force_feedback/index.php",
+  "http://lazyfoo.net/tutorials/SDL/21_sound_effects_and_music/index.php",
+  "http://lazyfoo.net/tutorials/SDL/22_timing/index.php",
+  "http://lazyfoo.net/tutorials/SDL/23_advanced_timers/index.php",
+  "http://lazyfoo.net/tutorials/SDL/24_calculating_frame_rate/index.php",
+  "http://lazyfoo.net/tutorials/SDL/25_capping_frame_rate/index.php",
+  "http://lazyfoo.net/tutorials/SDL/26_motion/index.php",
+  "http://lazyfoo.net/tutorials/SDL/27_collision_detection/index.php",
+  "http://lazyfoo.net/tutorials/SDL/28_per-pixel_collision_detection/index.php",
+  "http://lazyfoo.net/tutorials/SDL/29_circular_collision_detection/index.php",
+  "http://lazyfoo.net/tutorials/SDL/30_scrolling/index.php",
+  "http://lazyfoo.net/tutorials/SDL/31_scrolling_backgrounds/index.php",
+  "http://lazyfoo.net/tutorials/SDL/32_text_input_and_clipboard_handling/index.php",
+  "http://lazyfoo.net/tutorials/SDL/33_file_reading_and_writing/index.php",
+  "http://lazyfoo.net/tutorials/SDL/34_audio_recording/index.php",
+  "http://lazyfoo.net/tutorials/SDL/35_window_events/index.php",
+  "http://lazyfoo.net/tutorials/SDL/36_multiple_windows/index.php",
+  "http://lazyfoo.net/tutorials/SDL/37_multiple_displays/index.php",
+  "http://lazyfoo.net/tutorials/SDL/38_particle_engines/index.php",
+  "http://lazyfoo.net/tutorials/SDL/39_tiling/index.php",
+  "http://lazyfoo.net/tutorials/SDL/40_texture_manipulation/index.php",
+  "http://lazyfoo.net/tutorials/SDL/41_bitmap_fonts/index.php",
+  "http://lazyfoo.net/tutorials/SDL/42_texture_streaming/index.php",
+  "http://lazyfoo.net/tutorials/SDL/43_render_to_texture/index.php",
+  "http://lazyfoo.net/tutorials/SDL/44_frame_independent_movement/index.php",
+  "http://lazyfoo.net/tutorials/SDL/45_timer_callbacks/index.php",
+  "http://lazyfoo.net/tutorials/SDL/46_multithreading/index.php",
+  "http://lazyfoo.net/tutorials/SDL/47_semaphores/index.php",
+  "http://lazyfoo.net/tutorials/SDL/48_atomic_operations/index.php",
+  "http://lazyfoo.net/tutorials/SDL/49_mutexes_and_conditions/index.php",
+  "http://lazyfoo.net/tutorials/SDL/50_SDL_and_opengl_2/index.php",
+  "http://lazyfoo.net/tutorials/SDL/51_SDL_and_modern_opengl/index.php",
+  "http://lazyfoo.net/tutorials/SDL/52_hello_mobile/index.php",
+  "http://lazyfoo.net/tutorials/SDL/53_extensions_and_changing_orientation/index.php",
+  "http://lazyfoo.net/tutorials/SDL/54_touches/index.php",
+  "http://lazyfoo.net/tutorials/SDL/55_multitouch/index.php",
+]
+
+if len(argv) != 2:
+  raise Exception("Usage: ./tut 13")
+
+num = int(argv[1])
+sh("open %s"%links[num-1])
