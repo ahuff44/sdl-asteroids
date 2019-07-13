@@ -1,5 +1,7 @@
 hello.html
 hello.js
-hello.wasm
+test.html
+test.js
+*.wasm
 a.out
-hello.data
+*.data
