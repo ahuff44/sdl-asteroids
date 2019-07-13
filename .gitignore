@@ -1,7 +1,2 @@
-hello.html
-hello.js
-test.html
-test.js
-*.wasm
+out/*
 a.out
-*.data

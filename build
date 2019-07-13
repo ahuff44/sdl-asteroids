@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+
+import subprocess
+from sys import argv, exit
+import os
+
+def bash(cmdstr):
+  print cmdstr
+  print '----------'
+  subprocess.Popen(["/bin/bash", "-c", cmdstr])
+
+COMPILE = "gcc hello.c -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Frameworks/SDL2_image.framework/Headers -F ~/Library/Frameworks -framework SDL2 -framework SDL2_Image"
+options = {
+  "": "{} && ./a.out".format(COMPILE),
+  "compile": COMPILE,
+  "emscripten": "emcc hello.c -o out/hello.html --preload-file data --use-preload-plugins -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s TOTAL_MEMORY=512MB",
+  # "emscripten": "emcc hello.c -o hello.html --preload-file data --use-preload-plugins -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s SDL2_IMAGE_FORMATS='[\"bmp\",\"png\"]'",
+}
+
+def matchPrefix(prefix, options):
+  prefix = prefix.lower().strip()
+  if prefix in options:
+    return prefix
+  for opt in options:
+    if opt.startswith(prefix):
+      return opt
+  return None
+
+if len(argv) > 2:
+  print "Usage: ./build [|compile|emscripten]"
+if len(argv) == 1:
+  prefix = ""
+else:
+  prefix = argv[1]
+
+if not os.getenv("EMSDK"):
+  print "need to load emcc:"
+  print "\tsource ~/projects/emsdk/emsdk_env.sh"
+  exit(1)
+
+match = matchPrefix(prefix, options.keys())
+if match is not None:
+  # print "Running '%s'"%match
+  cmdstr = options[match]
+  bash(cmdstr)

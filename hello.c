@@ -33,12 +33,16 @@ bool initGame() {
   }
   screenSurface = SDL_GetWindowSurface(window);
 
-  // init png plugin
-  int imgFlags = IMG_INIT_PNG;
-  if (!(IMG_Init(imgFlags) & imgFlags)) {
-    printf("SDL_image error: %s\n", IMG_GetError());
-    printf("Could not initialize SDL_image\n");
-  }
+  #ifdef __EMSCRIPTEN__
+    // skip IMG_Init; see https://github.com/emscripten-ports/SDL2_image/issues/3
+  #else
+    // init png plugin
+    int imgFlags = IMG_INIT_PNG;
+    if (!(IMG_Init(imgFlags) & imgFlags)) {
+      printf("SDL_image error: %s\n", IMG_GetError());
+      printf("Could not initialize SDL_image\n");
+    }
+  #endif
 
   return true;
 }
@@ -88,13 +92,15 @@ Uint32 timeUntil(Uint32 target) {
 }
 
 bool _quitGame = false;
-void setQuitGame() {
 #ifdef __EMSCRIPTEN__
-  emscripten_cancel_main_loop();
+  void setQuitGame() {
+    emscripten_cancel_main_loop();
+  }
 #else
-  _quitGame = true;
+  void setQuitGame() {
+    _quitGame = true;
+  }
 #endif
-}
 
 void runForOneFrame() {
   SDL_Event e;
@@ -130,23 +136,26 @@ void runForOneFrame() {
   SDL_UpdateWindowSurface(window);
 }
 
-void runGame() {
 #ifdef __EMSCRIPTEN__
-  // void emscripten_set_main_loop(em_callback_func func, int fps, int simulate_infinite_loop);
-  emscripten_set_main_loop(runForOneFrame, 0, 1);
+  void runGame() {
+    // void emscripten_set_main_loop(em_callback_func func, int fps, int simulate_infinite_loop);
+    emscripten_set_main_loop(runForOneFrame, 0, 1);
+  }
 #else
-  Uint32 frameStartTime;
-  while (1) {
-    frameStartTime = SDL_GetTicks();
-    runForOneFrame();
-    if (_quitGame) break;
-    // Delay to keep frame rate constant (using SDL)
-    SDL_Delay(timeUntil(frameStartTime + TARGET_TICK_INTERVAL));
+  void runGame() {
+    Uint32 frameStartTime;
+    while (1) {
+      frameStartTime = SDL_GetTicks();
+      runForOneFrame();
+      if (_quitGame) break;
+      // Delay to keep frame rate constant (using SDL)
+      SDL_Delay(timeUntil(frameStartTime + TARGET_TICK_INTERVAL));
+    }
   }
 #endif
-}
 
 int main(int argc, char** argv) {
+  printf("flag 1\n");
   if (!initGame()) {
     printf("Failed to init\n");
     return 1;

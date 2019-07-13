@@ -42,6 +42,8 @@ gcc hello.c -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Framewor
   http://lazyfoo.net/tutorials/SDL/07_texture_loading_and_rendering/index.php
   http://lazyfoo.net/tutorials/SDL/08_geometry_rendering/index.php
   http://lazyfoo.net/tutorials/SDL/09_the_viewport/index.php
+* read ECS articles
+  https://www.richardlord.net/blog/ecs/
 
 ## misc notes
 
