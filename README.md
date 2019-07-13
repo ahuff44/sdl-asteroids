@@ -30,8 +30,7 @@ http://localhost:8080/hello.html
 ## Local (C) Dev instructions
 
 ```
-gcc hello.c -I ~/Library/Frameworks/SDL2.framework/Headers -F ~/Library/Frameworks -framework SDL2
-./a.out
+gcc hello.c -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Frameworks/SDL2_image.framework/Headers -F ~/Library/Frameworks -framework SDL2 -framework SDL2_Image && ./a.out
 ```
 
 

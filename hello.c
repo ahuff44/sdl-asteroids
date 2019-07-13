@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
-// #include <SDL2/SDL_image.h>
+#include <SDL_image.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
@@ -15,35 +15,44 @@ SDL_Window* window = NULL;
 SDL_Surface* screenSurface = NULL;
 
 bool initGame() {
+  // init SDL
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    printf("SDL_Error: %s\n", SDL_GetError());
+    printf("SDL error: %s\n", SDL_GetError());
     printf("Could not initialize SDL\n");
     return false;
   }
 
+  // make window
   window = SDL_CreateWindow("SDL Tutorial",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
     SDL_WINDOW_SHOWN);
   if (window == NULL) {
-    printf("SDL_Error: %s\n", SDL_GetError());
+    printf("SDL error: %s\n", SDL_GetError());
     printf("Could not create window\n");
     return false;
   }
-
   screenSurface = SDL_GetWindowSurface(window);
+
+  // init png plugin
+  int imgFlags = IMG_INIT_PNG;
+  if (!(IMG_Init(imgFlags) & imgFlags)) {
+    printf("SDL_image error: %s\n", IMG_GetError());
+    printf("Could not initialize SDL_image\n");
+  }
+
   return true;
 }
 
 SDL_Surface* loadSurface(char* path) {
-  SDL_Surface* loadedSfc = SDL_LoadBMP(path);
+  SDL_Surface* loadedSfc = IMG_Load(path);
   if (loadedSfc == NULL) {
-    printf("SDL_Error: %s\n", SDL_GetError());
+    printf("SDL_image error: %s\n", IMG_GetError());
     printf("Could not load surface %s\n", path);
     return NULL;
   }
   SDL_Surface* optimizedSfc = SDL_ConvertSurface(loadedSfc, screenSurface->format, 0);
   if (optimizedSfc == NULL) {
-    printf("SDL_Error: %s\n", SDL_GetError());
+    printf("SDL error: %s\n", SDL_GetError());
     printf("Could not optimize surface %s\n", path);
     printf("Recovering...\n");
     return loadedSfc;
@@ -56,6 +65,7 @@ SDL_Surface* loadSurface(char* path) {
 SDL_Surface* helloSurface = NULL;
 bool loadMedia() {
   if (!(helloSurface = loadSurface("data/hello_world.bmp"))) return false;
+  if (!(helloSurface = loadSurface("data/quine.png"))) return false;
   return true;
 }
 
@@ -69,10 +79,10 @@ void closeGame() {
 Uint32 timeUntil(Uint32 target) {
   Uint32 now = SDL_GetTicks();
   if (target <= now) {
-    printf("idle time: 0\n");
+    // printf("idle time: 0\n");
     return 0;
   } else {
-    printf("idle time: %d\n", target - now);
+    // printf("idle time: %d\n", target - now);
     return target - now;
   }
 }
