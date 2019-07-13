@@ -155,7 +155,6 @@ void runForOneFrame() {
 #endif
 
 int main(int argc, char** argv) {
-  printf("flag 1\n");
   if (!initGame()) {
     printf("Failed to init\n");
     return 1;
