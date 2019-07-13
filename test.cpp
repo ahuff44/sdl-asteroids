@@ -8,6 +8,8 @@ This works locally:
 And this works in-browser:
   emcc test.cpp -o test.html -s USE_SDL=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1
   (then go to localhost:8080/test.html)
+
+the DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR is unnecessary, btw
 */
 
 #include <stdio.h>
@@ -20,6 +22,8 @@ And this works in-browser:
 SDL_Window * window;
 SDL_Renderer * renderer;
 
+const int LENGTH = 250;
+
 void render_func(void) {
     SDL_SetRenderDrawColor(renderer, 200, 0, 0, 255);
     SDL_RenderClear(renderer);
@@ -31,8 +35,12 @@ void render_func(void) {
     SDL_RenderPresent(renderer);
 
 #ifdef __EMSCRIPTEN__
-    // emscripten_cancel_main_loop();
-    printf("2e done\n");
+    static int i;
+    i += 1;
+    if (i >= LENGTH) {
+      emscripten_cancel_main_loop();
+      printf("emscripten done\n");
+    }
 #endif
 }
 
@@ -40,19 +48,18 @@ int main(int argc, char* argv[])
 {
     assert(SDL_Init(SDL_INIT_VIDEO) == 0);
     SDL_CreateWindowAndRenderer(640, 320, 0, &window, &renderer);
-    printf("1 setup\n");
 
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(render_func, 30, 1);
+    emscripten_set_main_loop(render_func, 0, 1);
 #else
     int i = 0;
-    while (i < 500) {
+    while (i < LENGTH) {
       i += 1;
       render_func();
       SDL_Delay(10);
     }
 #endif
-    printf("ahuff-flag 2c done\n");
+    printf("no-emscripten done\n");
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
