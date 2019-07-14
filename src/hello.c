@@ -14,7 +14,7 @@ const int SCREEN_HEIGHT = 480;
 const int TARGET_TICK_INTERVAL = 1000 / 30; // want 30fps
 
 SDL_Window* window = NULL;
-SDL_Surface* screenSurface = NULL;
+SDL_Renderer* renderer = NULL;
 
 bool initGame() {
   // init SDL
@@ -33,7 +33,12 @@ bool initGame() {
     printf("Could not create window\n");
     return false;
   }
-  screenSurface = SDL_GetWindowSurface(window);
+  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  if (renderer == NULL) {
+    printf("SDL error: %s\n", SDL_GetError());
+    printf("Could not create renderer\n");
+    return false;
+  }
 
   #ifdef __EMSCRIPTEN__
     // skip IMG_Init; see https://github.com/emscripten-ports/SDL2_image/issues/3
@@ -49,33 +54,35 @@ bool initGame() {
   return true;
 }
 
-SDL_Surface* loadSurface(char* path) {
+SDL_Texture* loadTex(char* path) {
   SDL_Surface* loadedSfc = IMG_Load(path);
   if (loadedSfc == NULL) {
     printf("SDL_image error: %s\n", IMG_GetError());
     printf("Could not load surface %s\n", path);
     return NULL;
   }
-  SDL_Surface* optimizedSfc = SDL_ConvertSurface(loadedSfc, screenSurface->format, 0);
-  if (optimizedSfc == NULL) {
+  SDL_Texture* loadedTex = SDL_CreateTextureFromSurface(renderer, loadedSfc);
+  if (loadedTex == NULL) {
     printf("SDL error: %s\n", SDL_GetError());
-    printf("Could not optimize surface %s\n", path);
-    printf("Recovering...\n");
-    return loadedSfc;
+    printf("Could not texturify surface %s\n", path);
+    return NULL;
   }
 
   SDL_FreeSurface(loadedSfc);
-  return optimizedSfc;
+  return loadedTex;
 }
 
-SDL_Surface* helloSurface = NULL;
+SDL_Texture* helloTex = NULL;
 bool loadMedia() {
-  if (!(helloSurface = loadSurface("data/hello_world.bmp"))) return false;
-  if (!(helloSurface = loadSurface("data/quine.png"))) return false;
+  if (!(helloTex = loadTex("data/hello_world.bmp"))) return false;
+  SDL_DestroyTexture(helloTex);
+  if (!(helloTex = loadTex("data/quine.png"))) return false;
   return true;
 }
 
 void closeGame() {
+  SDL_DestroyRenderer(renderer);
+  renderer = NULL;
   SDL_DestroyWindow(window);
   window = NULL;
 
@@ -126,25 +133,24 @@ void runForOneFrame() {
 
   // all events for this pseudo-frame have now been processed
 
-  // SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0x00, 0xFF));
-
   SDL_Rect stretchRect;
   stretchRect.x = 0;
   stretchRect.y = 0;
   stretchRect.w = SCREEN_WIDTH/2;
   stretchRect.h = SCREEN_HEIGHT/2;
-  SDL_BlitScaled(helloSurface, NULL, screenSurface, &stretchRect);
 
-  SDL_UpdateWindowSurface(window);
+  SDL_RenderClear(renderer);
+  SDL_RenderCopy(renderer, helloTex, NULL, &stretchRect);
+  SDL_RenderPresent(renderer);
 }
 
 #ifdef __EMSCRIPTEN__
-  void runGame() {
+  void runGame_fork() {
     // void emscripten_set_main_loop(em_callback_func func, int fps, int simulate_infinite_loop);
     emscripten_set_main_loop(runForOneFrame, 0, 1);
   }
 #else
-  void runGame() {
+  void runGame_fork() {
     Uint32 frameStartTime;
     while (1) {
       frameStartTime = SDL_GetTicks();
@@ -155,6 +161,11 @@ void runForOneFrame() {
     }
   }
 #endif
+
+void runGame() {
+  SDL_SetRenderDrawColor(renderer, 0xFF, 0, 0xFF, 0xFF);
+  runGame_fork();
+}
 
 int main(int argc, char** argv) {
   if (!initGame()) {
