@@ -39,6 +39,7 @@ bool initGame() {
     printf("Could not create renderer\n");
     return false;
   }
+  SDL_SetRenderDrawColor(renderer, 0xFF, 0, 0xFF, 0xFF); // magenta
 
   #ifdef __EMSCRIPTEN__
     // skip IMG_Init; see https://github.com/emscripten-ports/SDL2_image/issues/3
@@ -58,13 +59,18 @@ SDL_Texture* loadTex(char* path) {
   SDL_Surface* loadedSfc = IMG_Load(path);
   if (loadedSfc == NULL) {
     printf("SDL_image error: %s\n", IMG_GetError());
-    printf("Could not load surface %s\n", path);
+    printf("Could not load surface (%s)\n", path);
+    return NULL;
+  }
+  if (!SDL_SetColorKey(loadedSfc, SDL_TRUE, SDL_MapRGB(loadedSfc->format, 0xFF, 0, 0))) {
+    printf("SDL error: %s\n", SDL_GetError());
+    printf("Could not apply color key (%s)\n", path);
     return NULL;
   }
   SDL_Texture* loadedTex = SDL_CreateTextureFromSurface(renderer, loadedSfc);
   if (loadedTex == NULL) {
     printf("SDL error: %s\n", SDL_GetError());
-    printf("Could not texturify surface %s\n", path);
+    printf("Could not create texture (%s)\n", path);
     return NULL;
   }
 
@@ -74,9 +80,9 @@ SDL_Texture* loadTex(char* path) {
 
 SDL_Texture* helloTex = NULL;
 bool loadMedia() {
-  if (!(helloTex = loadTex("data/hello_world.bmp"))) return false;
-  SDL_DestroyTexture(helloTex);
-  if (!(helloTex = loadTex("data/quine.png"))) return false;
+  // if (!(helloTex = loadTex("data/hello_world.bmp"))) return false;
+  // SDL_DestroyTexture(helloTex);
+  if (!(helloTex = loadTex("data/asteroid.png"))) return false;
   return true;
 }
 
@@ -133,11 +139,7 @@ void runForOneFrame() {
 
   // all events for this pseudo-frame have now been processed
 
-  SDL_Rect stretchRect;
-  stretchRect.x = 0;
-  stretchRect.y = 0;
-  stretchRect.w = SCREEN_WIDTH/2;
-  stretchRect.h = SCREEN_HEIGHT/2;
+  SDL_Rect stretchRect = { .x = 0, .y = 0, .w = SCREEN_WIDTH/2, .h = SCREEN_HEIGHT/2 };
 
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, helloTex, NULL, &stretchRect);
@@ -163,7 +165,6 @@ void runForOneFrame() {
 #endif
 
 void runGame() {
-  SDL_SetRenderDrawColor(renderer, 0xFF, 0, 0xFF, 0xFF);
   runGame_fork();
 }
 

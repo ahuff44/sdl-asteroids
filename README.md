@@ -31,12 +31,7 @@ http://localhost:8080/hello.html
 
 ## Todo
 
-* Set up proper makefile; shouldn't be too hard
-* Do GPU sections of tutorial: (skipped)
-  http://lazyfoo.net/tutorials/SDL/07_texture_loading_and_rendering/index.php
-  http://lazyfoo.net/tutorials/SDL/08_geometry_rendering/index.php
-  http://lazyfoo.net/tutorials/SDL/09_the_viewport/index.php
-* read ECS articles
+* Read ECS articles
   https://www.richardlord.net/blog/ecs/
 
 ## misc notes

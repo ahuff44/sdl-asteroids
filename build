@@ -6,8 +6,8 @@ import os
 
 def bash(cmdstr):
   print cmdstr
-  print '----------'
-  subprocess.Popen(["/bin/bash", "-c", cmdstr])
+  p = subprocess.Popen(["/bin/bash", "-c", cmdstr])
+  p.communicate()
 
 ENTRY = "src/hello.c"
 OFILE = "./out/a"
