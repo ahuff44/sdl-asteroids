@@ -1,5 +1,12 @@
 # WebAssembly Hello World
 
+## Local (C) Dev instructions
+
+```
+./build compile && ./out/a  # compile and run
+./build  # shortcut for the above command
+```
+
 ## Emscripten Dev instructions
 
 I followed https://webassembly.org/getting-started/developers-guide/
@@ -8,28 +15,17 @@ tl;dr:
 
 ### Setup (once per day)
 
-1. Get cmdline aliases:
+1. (in a separate shell) Run webserver: `./server.sh`
+2. Get cmdline aliases:
 ```
 source ~/projects/emsdk/emsdk_env.sh
-```
-2. Run webserver:
-```
-emrun --no_browser --port 8080 .
 ```
 
 ### Dev loop (once per change)
 
-1. Edit hello.c
-2. Compile the code: `./build emscripten`
-3. Refresh:
-http://localhost:8080/out/hello.html
-
-## Local (C) Dev instructions
-
-```
-./build  # this compiles and runs
-./build compile  # this only compiles
-```
+1. Compile the code: `./build emscripten`
+2. Refresh:
+http://localhost:8080/hello.html
 
 
 

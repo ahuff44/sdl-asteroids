@@ -9,12 +9,15 @@ def bash(cmdstr):
   print '----------'
   subprocess.Popen(["/bin/bash", "-c", cmdstr])
 
-COMPILE = "gcc src/hello.c -o ./out/a -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Frameworks/SDL2_image.framework/Headers -F ~/Library/Frameworks -framework SDL2 -framework SDL2_Image"
+ENTRY = "src/hello.c"
+OFILE = "./out/a"
+OFILE_EM = "out/hello.html"
+COMPILE = "gcc {ENTRY} -o {OFILE} -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Frameworks/SDL2_image.framework/Headers -F ~/Library/Frameworks -framework SDL2 -framework SDL2_Image".format(**locals())
 options = {
-  "": "{} && ./out/a".format(COMPILE),
+  "": "{COMPILE} && {OFILE}".format(**locals()),
   "clean": "trash out/* && ls -l out/",
   "compile": COMPILE,
-  "emscripten": "emcc src/hello.c -o out/hello.html --preload-file data --use-preload-plugins -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s TOTAL_MEMORY=512MB",
+  "emscripten": "emcc {ENTRY} -o {OFILE_EM} --preload-file data --use-preload-plugins -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s TOTAL_MEMORY=512MB".format(**locals()),
 }
 
 
