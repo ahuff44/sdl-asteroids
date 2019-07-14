@@ -7,14 +7,14 @@
   #include <emscripten/emscripten.h>
 #endif
 
-#include "media.c"
-
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int TARGET_TICK_INTERVAL = 1000 / 30; // want 30fps
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+
+#include "media.c"
 
 bool initGame() {
   // init SDL
@@ -106,18 +106,15 @@ void runForOneFrame() {
     }
   }
 
-  // all events for this pseudo-frame have now been processed
-
-  SDL_Rect stretchRect = { .x = 0, .y = 0, .w = SCREEN_WIDTH/2, .h = SCREEN_HEIGHT/2 };
+  // all events for this frame have now been processed
 
   SDL_RenderClear(renderer);
-  SDL_RenderCopy(renderer, helloTex, NULL, &stretchRect);
+  TextureRender(helloTex, 100, 0);
   SDL_RenderPresent(renderer);
 }
 
 #ifdef __EMSCRIPTEN__
   void runGame_fork() {
-    // void emscripten_set_main_loop(em_callback_func func, int fps, int simulate_infinite_loop);
     emscripten_set_main_loop(runForOneFrame, 0, 1);
   }
 #else
@@ -127,7 +124,7 @@ void runForOneFrame() {
       frameStartTime = SDL_GetTicks();
       runForOneFrame();
       if (_quitGame) break;
-      // Delay to keep frame rate constant (using SDL)
+      // Delay to keep frame rate constant
       SDL_Delay(timeUntil(frameStartTime + TARGET_TICK_INTERVAL));
     }
   }
