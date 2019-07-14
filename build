@@ -9,9 +9,9 @@ def bash(cmdstr):
   p = subprocess.Popen(["/bin/bash", "-c", cmdstr])
   p.communicate() # wait for the process to end
 
-ENTRY = "src/hello.c"
+ENTRY = "src/main.c"
 OFILE = "./out/a"
-OFILE_EM = "out/hello.html"
+OFILE_EM = "out/index.html"
 COMPILE = "gcc {ENTRY} -o {OFILE} -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Frameworks/SDL2_image.framework/Headers -F ~/Library/Frameworks -framework SDL2 -framework SDL2_Image".format(**locals())
 options = {
   "": "{COMPILE} && {OFILE}".format(**locals()),
