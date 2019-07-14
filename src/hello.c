@@ -62,7 +62,7 @@ SDL_Texture* loadTex(char* path) {
     printf("Could not load surface (%s)\n", path);
     return NULL;
   }
-  if (!SDL_SetColorKey(loadedSfc, SDL_TRUE, SDL_MapRGB(loadedSfc->format, 0xFF, 0, 0))) {
+  if (SDL_SetColorKey(loadedSfc, SDL_TRUE, SDL_MapRGB(loadedSfc->format, 0xFF, 0, 0)) < 0) {
     printf("SDL error: %s\n", SDL_GetError());
     printf("Could not apply color key (%s)\n", path);
     return NULL;
