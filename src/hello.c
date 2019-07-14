@@ -4,8 +4,10 @@
 #include <SDL2/SDL.h>
 #include <SDL_image.h>
 #ifdef __EMSCRIPTEN__
-#include <emscripten/emscripten.h>
+  #include <emscripten/emscripten.h>
 #endif
+
+#include "test.c"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -155,6 +157,7 @@ void runForOneFrame() {
 #endif
 
 int main(int argc, char** argv) {
+  printf("foo(3)=%d\n", foo(3));
   if (!initGame()) {
     printf("Failed to init\n");
     return 1;
