@@ -42,8 +42,13 @@ void TextureFree(Texture tex) {
   SDL_DestroyTexture(tex.tex);
 }
 
-void TextureRender(Texture tex, int x, int y) {
-  SDL_RenderCopy(renderer, tex.tex, NULL, &(SDL_Rect){ .x=x, .y=y, .w=tex.w, .h=tex.h });
+void TextureRender(Texture tex, int x, int y, SDL_Rect* clip) {
+  SDL_Rect dest = { .x=x, .y=y, .w=tex.w, .h=tex.h };
+  if (clip != NULL) {
+    dest.w = clip->w;
+    dest.h = clip->h;
+  }
+  SDL_RenderCopy(renderer, tex.tex, clip, &dest);
 }
 
 Texture helloTex;

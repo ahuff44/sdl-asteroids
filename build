@@ -7,7 +7,7 @@ import os
 def bash(cmdstr):
   print cmdstr
   p = subprocess.Popen(["/bin/bash", "-c", cmdstr])
-  p.communicate()
+  p.communicate() # wait for the process to end
 
 ENTRY = "src/hello.c"
 OFILE = "./out/a"
@@ -35,7 +35,8 @@ def matchPrefix(prefix, options):
   return foundOpt
 
 if len(argv) > 2:
-  print "Usage: ./build [|compile|emscripten]"
+  print "Usage: ./build [{}]".format('|'.join(options.keys()))
+  exit(1)
 if len(argv) == 1:
   prefix = ""
 else:

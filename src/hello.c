@@ -39,7 +39,7 @@ bool initGame() {
     printf("Could not create renderer\n");
     return false;
   }
-  SDL_SetRenderDrawColor(renderer, 0xFF, 0, 0xFF, 0xFF); // magenta
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 
   #ifdef __EMSCRIPTEN__
     // skip IMG_Init; see https://github.com/emscripten-ports/SDL2_image/issues/3
@@ -109,7 +109,8 @@ void runForOneFrame() {
   // all events for this frame have now been processed
 
   SDL_RenderClear(renderer);
-  TextureRender(helloTex, 100, 0);
+  // TextureRender(helloTex, 100, 0, &(SDL_Rect){.x=16,.y=16,.w=16,.h=16});
+  TextureRender(helloTex, 100, 0, NULL);
   SDL_RenderPresent(renderer);
 }
 
