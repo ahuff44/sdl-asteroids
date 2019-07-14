@@ -25,10 +25,14 @@ def matchPrefix(prefix, options):
   prefix = prefix.lower().strip()
   if prefix in options:
     return prefix
+  foundOpt = None
   for opt in options:
     if opt.startswith(prefix):
-      return opt
-  return None
+      if foundOpt is None:
+        foundOpt = opt
+      else:
+        raise Exception("Multiple options match prefix '%s' ('%s', '%s', maybe others)"%(prefix, foundOpt, opt))
+  return foundOpt
 
 if len(argv) > 2:
   print "Usage: ./build [|compile|emscripten]"
@@ -43,7 +47,9 @@ if not os.getenv("EMSDK"):
   exit(1)
 
 match = matchPrefix(prefix, options.keys())
-if match is not None:
+if match is None:
+  raise Exception("No matching option found")
+else:
   # print "Running '%s'"%match
   cmdstr = options[match]
   bash(cmdstr)

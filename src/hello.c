@@ -7,7 +7,7 @@
   #include <emscripten/emscripten.h>
 #endif
 
-// #include "test.c"
+#include "media.c"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -52,37 +52,6 @@ bool initGame() {
     }
   #endif
 
-  return true;
-}
-
-SDL_Texture* loadTex(char* path) {
-  SDL_Surface* loadedSfc = IMG_Load(path);
-  if (loadedSfc == NULL) {
-    printf("SDL_image error: %s\n", IMG_GetError());
-    printf("Could not load surface (%s)\n", path);
-    return NULL;
-  }
-  if (SDL_SetColorKey(loadedSfc, SDL_TRUE, SDL_MapRGB(loadedSfc->format, 0xFF, 0, 0)) < 0) {
-    printf("SDL error: %s\n", SDL_GetError());
-    printf("Could not apply color key (%s)\n", path);
-    return NULL;
-  }
-  SDL_Texture* loadedTex = SDL_CreateTextureFromSurface(renderer, loadedSfc);
-  if (loadedTex == NULL) {
-    printf("SDL error: %s\n", SDL_GetError());
-    printf("Could not create texture (%s)\n", path);
-    return NULL;
-  }
-
-  SDL_FreeSurface(loadedSfc);
-  return loadedTex;
-}
-
-SDL_Texture* helloTex = NULL;
-bool loadMedia() {
-  // if (!(helloTex = loadTex("data/hello_world.bmp"))) return false;
-  // SDL_DestroyTexture(helloTex);
-  if (!(helloTex = loadTex("data/asteroid.png"))) return false;
   return true;
 }
 
@@ -174,7 +143,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  if (!loadMedia()) {
+  if (!LoadMedia()) {
     printf("Failed to load media\n");
     return 1;
   }
