@@ -130,10 +130,7 @@ void runForOneFrame() {
 
 void runGame() {
   InitRNG();
-  AsteroidCreate(100, 100);
-  AsteroidCreate(200, 100);
-  AsteroidCreate(300, 200);
-  PlayerCreate();
+  InitGame();
   runGame_fork();
 }
 

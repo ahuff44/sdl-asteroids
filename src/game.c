@@ -1,18 +1,18 @@
 typedef struct {
-  int x;
-  int y;
-  int dx;
-  int dy;
-  int t; // angle
-  int dt;
+  float x;
+  float y;
+  float dx;
+  float dy;
+  float t; // angle
+  float dt;
 } Asteroid;
 
 Asteroid asteroids[128] = {};
 int asteroid_count = 0;
-void AsteroidCreate(int x, int y) {
+void AsteroidCreate() {
   Asteroid *out = &asteroids[asteroid_count++];
-  out->x = x;
-  out->y = y;
+  out->x = randInt(SCREEN_WIDTH);
+  out->y = randInt(SCREEN_HEIGHT);
   out->dx = randIntIn(-5, 6);
   out->dy = randIntIn(-5, 6);
   out->t = randInt(360);
@@ -41,7 +41,7 @@ typedef struct {
   float y;
   float dx;
   float dy;
-  int t; // angle
+  float t; // angle
 } Ship;
 
 Ship player;
@@ -82,4 +82,12 @@ void PlayerUpdate() {
 
 void PlayerRender() {
   TextureRenderEx(shipTex, player.x, player.y, NULL, player.t, NULL, SDL_FLIP_NONE);
+}
+
+
+void InitGame() {
+  for (int i = 0; i < 10; ++i) {
+    AsteroidCreate();
+  }
+  PlayerCreate();
 }
