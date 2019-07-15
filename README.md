@@ -34,7 +34,10 @@ http://localhost:8080/
 * Read ECS articles
   https://www.richardlord.net/blog/ecs/
 * Read skipped tutorials
-  * 16 (fonts; current)
+  * 16 (fonts)
+  * 17 (mouse events)
+  * 19, 20 (gamepads)
+  * 21 (music, current)
 
 ## misc notes
 

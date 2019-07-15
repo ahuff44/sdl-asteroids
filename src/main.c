@@ -97,8 +97,6 @@ void runForOneFrame() {
     if (e.type == SDL_QUIT) {
       setQuitGame();
       return;
-    } else if (e.type == SDL_KEYDOWN) {
-      PlayerInput(e.key.keysym.sym);
     }
   }
 

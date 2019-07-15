@@ -57,24 +57,27 @@ void PlayerCreate() {
   ShipCreate(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, &player);
 }
 
-void PlayerUpdate() {
-  player.x = saneMod(player.x + player.dx, SCREEN_WIDTH);
-  player.y = saneMod(player.y + player.dy, SCREEN_HEIGHT);
-}
-
-void PlayerInput(SDL_Keycode code) {
-  double pi = acos(-1);
-  if (code == SDLK_UP) {
-    player.dx += 2*cos(player.t * (pi/180));
-    player.dy += 2*sin(player.t * (pi/180));
-  } else if (code == SDLK_DOWN) {
-    player.dx -= 2*cos(player.t * (pi/180));
-    player.dy -= 2*sin(player.t * (pi/180));
-  } else if (code == SDLK_RIGHT) {
+void PlayerInput() {
+  const Uint8* state = SDL_GetKeyboardState(NULL);
+  if (state[SDL_SCANCODE_UP]) {
+    double pi = acos(-1);
+    player.dx += 0.4*cos(player.t * (pi/180));
+    player.dy += 0.4*sin(player.t * (pi/180));
+  } else if (state[SDL_SCANCODE_DOWN]) {
+    double pi = acos(-1);
+    player.dx -= 0.4*cos(player.t * (pi/180));
+    player.dy -= 0.4*sin(player.t * (pi/180));
+  } else if (state[SDL_SCANCODE_RIGHT]) {
     player.t += 5;
-  } else if (code == SDLK_LEFT) {
+  } else if (state[SDL_SCANCODE_LEFT]) {
     player.t -= 5;
   }
+}
+
+void PlayerUpdate() {
+  PlayerInput();
+  player.x = saneMod(player.x + player.dx, SCREEN_WIDTH);
+  player.y = saneMod(player.y + player.dy, SCREEN_HEIGHT);
 }
 
 void PlayerRender() {
