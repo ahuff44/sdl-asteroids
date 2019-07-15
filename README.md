@@ -53,3 +53,16 @@ From one the SDL.dmg README (iirc):
   SDL, thus the videos are recommended for everybody getting started with
   developing on Mac OS X. (You can skim over the PlugIns stuff since SDL
   doesn't have any PlugIns to worry about.)
+
+
+windows issues:
+  main.c:
+    -#include <SDL2/SDL.h>
+    +#include <SDL.h>
+
+  $ clang src/main.c -I/c/SDL2-2.0.9/i686-w64-mingw32/include/SDL2 -I/c/SDL2_image-2.0.5/i686-w64-mingw32/include/SDL2 -L/c/SDL2-2.0.9/i686-w64-mingw32/lib -L/c/SDL2_image-2.0.5/i686-w64-mingw32/lib -lSDL2main -lSDL2 -lSDL2_image -o a.out
+  ...
+  81 warnings generated.
+  LINK : fatal error LNK1181: cannot open input file 'SDL2main.lib'
+
+  i dunno i give up. maybe i need mingw?
