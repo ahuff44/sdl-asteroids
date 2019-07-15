@@ -60,11 +60,16 @@ void TextureRenderEx(Texture tex, int x, int y, SDL_Rect* clip, double angle, SD
   SDL_RenderCopyEx(renderer, tex.tex, clip, &dest, angle, center, flip);
 }
 
+Texture shipTex;
 Texture asteroidTex;
 bool LoadMedia() {
   bool success = true;
   if (!TextureLoad("data/asteroid.png", &asteroidTex)) {
     printf("Could not load image %s\n", "data/asteroid.png");
+    success = false;
+  }
+  if (!TextureLoad("data/ship.png", &shipTex)) {
+    printf("Could not load image %s\n", "data/ship.png");
     success = false;
   }
   return success;

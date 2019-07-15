@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 #include <SDL2/SDL.h>
 #include <SDL_image.h>
 #ifdef __EMSCRIPTEN__
@@ -97,24 +98,18 @@ void runForOneFrame() {
       setQuitGame();
       return;
     } else if (e.type == SDL_KEYDOWN) {
-      if (e.key.keysym.sym == SDLK_UP) {
-        printf("Pressed up\n");
-      } else if (e.key.keysym.sym == SDLK_LEFT) {
-        printf("Pressed left\n");
-      } else if (e.key.keysym.sym == SDLK_RIGHT) {
-        printf("Pressed right\n");
-      } else if (e.key.keysym.sym == SDLK_DOWN) {
-        printf("Pressed down\n");
-      }
+      PlayerInput(e.key.keysym.sym);
     }
   }
 
+  PlayerUpdate();
   AsteroidUpdate();
 
   // all events for this frame have now been processed
 
   SDL_RenderClear(renderer);
   AsteroidRender();
+  PlayerRender();
   SDL_RenderPresent(renderer);
 }
 
@@ -140,6 +135,7 @@ void runGame() {
   AsteroidCreate(100, 100);
   AsteroidCreate(200, 100);
   AsteroidCreate(300, 200);
+  PlayerCreate();
   runGame_fork();
 }
 
