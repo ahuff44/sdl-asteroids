@@ -63,13 +63,16 @@ void PlayerInput() {
     double pi = acos(-1);
     player.dx += 0.4*cos(player.t * (pi/180));
     player.dy += 0.4*sin(player.t * (pi/180));
-  } else if (state[SDL_SCANCODE_DOWN]) {
+  }
+  if (state[SDL_SCANCODE_DOWN]) {
     double pi = acos(-1);
     player.dx -= 0.4*cos(player.t * (pi/180));
     player.dy -= 0.4*sin(player.t * (pi/180));
-  } else if (state[SDL_SCANCODE_RIGHT]) {
+  }
+  if (state[SDL_SCANCODE_RIGHT]) {
     player.t += 5;
-  } else if (state[SDL_SCANCODE_LEFT]) {
+  }
+  if (state[SDL_SCANCODE_LEFT]) {
     player.t -= 5;
   }
 }
