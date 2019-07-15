@@ -74,3 +74,10 @@ bool LoadMedia() {
   }
   return success;
 }
+
+void FreeMedia() {
+  SDL_DestroyTexture(shipTex.tex);
+  shipTex = (Texture){0};
+  SDL_DestroyTexture(asteroidTex.tex);
+  asteroidTex = (Texture){0};
+}

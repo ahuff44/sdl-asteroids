@@ -60,6 +60,8 @@ bool initSDL() {
 }
 
 void closeGame() {
+  FreeMedia();
+
   SDL_DestroyRenderer(renderer);
   renderer = NULL;
   SDL_DestroyWindow(window);

@@ -31,7 +31,7 @@ void AsteroidUpdate() {
 void AsteroidRender() {
   for (int i = 0; i < asteroid_count; ++i) {
     Asteroid a = asteroids[i];
-    TextureRenderEx(asteroidTex, a.x, a.y, NULL, a.t, NULL, SDL_FLIP_NONE);
+    TextureRenderEx(asteroidTex, a.x-asteroidTex.w/2, a.y-asteroidTex.h/2, NULL, a.t, NULL, SDL_FLIP_NONE);
   }
 }
 
@@ -174,7 +174,7 @@ void HandleCollisions() {
     SDL_Rect aMask = CollisionMask(asteroidTex, a.x, a.y, 2);
 
     // with player
-    SDL_Rect pMask = CollisionMask(shipTex, player.x, player.y, 8);
+    SDL_Rect pMask = CollisionMask(shipTex, player.x, player.y, 12);
     if (SDL_HasIntersection(&aMask, &pMask) == SDL_TRUE) {
       if (!arrayHas(aToKill, aToKill_count, j)) aToKill[aToKill_count++] = j;
       player.dead = true;
