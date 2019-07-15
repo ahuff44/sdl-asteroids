@@ -15,7 +15,7 @@ tl;dr:
 
 ### Setup (once per day)
 
-1. (in a separate shell) Run webserver: `./server.sh`
+1. (in a separate shell) Run webserver: `./server`
 2. Get cmdline aliases:
 ```
 source ~/projects/emsdk/emsdk_env.sh
