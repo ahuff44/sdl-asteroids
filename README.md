@@ -1,4 +1,9 @@
-# WebAssembly Hello World
+# SDL / Emscripten sandbox
+
+This is a toy project to learn about SDL / Emscripten / WebAssembly / ECS
+
+Shoutouts to http://lazyfoo.net/tutorials/SDL/index.php, which has been a very
+helpful guide while learning SDL.
 
 ## Local (C) Dev instructions
 
@@ -24,8 +29,7 @@ source ~/projects/emsdk/emsdk_env.sh
 ### Dev loop (once per change)
 
 1. Compile the code: `./build emscripten`
-2. Refresh:
-http://localhost:8080/
+2. Refresh http://localhost:8080/
 
 
 
@@ -49,5 +53,3 @@ From one the SDL.dmg README (iirc):
   SDL, thus the videos are recommended for everybody getting started with
   developing on Mac OS X. (You can skim over the PlugIns stuff since SDL
   doesn't have any PlugIns to worry about.)
-
-`emcc --help | bat` has some interesting profiling option (search "profil")
