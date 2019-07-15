@@ -3,8 +3,10 @@
 import subprocess
 from sys import argv
 
-def sh(cmdstr):
-  subprocess.call(cmdstr.split(' '))
+def bash(cmdstr):
+  print cmdstr
+  p = subprocess.Popen(["/bin/bash", "-c", cmdstr])
+  p.communicate() # wait for the process to end
 
 links = [
   "http://lazyfoo.net/tutorials/SDL/01_hello_SDL/index.php",
@@ -68,4 +70,4 @@ if len(argv) != 2:
   raise Exception("Usage: ./tut 13")
 
 num = int(argv[1])
-sh("open %s"%links[num-1])
+bash("open %s"%links[num-1])

@@ -73,7 +73,7 @@ void closeGame() {
 Uint32 timeUntil(Uint32 target) {
   Uint32 now = SDL_GetTicks();
   if (target <= now) {
-    // printf("idle time: 0\n");
+    printf("frame took %dms too long\n", now - target);
     return 0;
   } else {
     // printf("idle time: %d\n", target - now);
