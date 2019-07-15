@@ -42,15 +42,16 @@ if len(argv) == 1:
 else:
   prefix = argv[1]
 
-if not os.getenv("EMSDK"):
-  print "need to load emcc:"
-  print "\tsource ~/projects/emsdk/emsdk_env.sh"
-  exit(1)
 
 match = matchPrefix(prefix, options.keys())
 if match is None:
   raise Exception("No matching option found")
 else:
   # print "Running '%s'"%match
+  if match == "emscripten" and not os.getenv("EMSDK"):
+    print "need to load emcc:"
+    print "\tsource ~/projects/emsdk/emsdk_env.sh"
+    exit(1)
+
   cmdstr = options[match]
   bash(cmdstr)
