@@ -11,7 +11,8 @@
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
-const int TARGET_TICK_INTERVAL = 1000 / 30; // want 30fps
+const int TARGET_FPS = 30;
+const int TARGET_TICK_INTERVAL = 1000 / TARGET_FPS;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
@@ -118,7 +119,7 @@ void runForOneFrame() {
 
 #ifdef __EMSCRIPTEN__
   void runGame_fork() {
-    emscripten_set_main_loop(runForOneFrame, 0, 1);
+    emscripten_set_main_loop(runForOneFrame, TARGET_FPS, 1);
   }
 #else
   void runGame_fork() {

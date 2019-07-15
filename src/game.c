@@ -174,7 +174,7 @@ void HandleCollisions() {
     SDL_Rect aMask = CollisionMask(asteroidTex, a.x, a.y, 2);
 
     // with player
-    SDL_Rect pMask = CollisionMask(shipTex, player.x, player.y, 4);
+    SDL_Rect pMask = CollisionMask(shipTex, player.x, player.y, 8);
     if (SDL_HasIntersection(&aMask, &pMask) == SDL_TRUE) {
       if (!arrayHas(aToKill, aToKill_count, j)) aToKill[aToKill_count++] = j;
       player.dead = true;
