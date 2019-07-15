@@ -20,7 +20,7 @@ SDL_Renderer* renderer = NULL;
 #include "media.c"
 #include "game.c"
 
-bool initGame() {
+bool initSDL() {
   // init SDL
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     printf("SDL error: %s\n", SDL_GetError());
@@ -43,7 +43,6 @@ bool initGame() {
     printf("Could not create renderer\n");
     return false;
   }
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 
   #ifdef __EMSCRIPTEN__
     // skip IMG_Init; see https://github.com/emscripten-ports/SDL2_image/issues/3
@@ -97,17 +96,23 @@ void runForOneFrame() {
     if (e.type == SDL_QUIT) {
       setQuitGame();
       return;
+    } else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {
+      InitGame();
     }
   }
 
   PlayerUpdate();
+  BulletUpdate();
   AsteroidUpdate();
+  HandleCollisions();
 
   // all events for this frame have now been processed
 
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
   SDL_RenderClear(renderer);
-  AsteroidRender();
   PlayerRender();
+  BulletRender();
+  AsteroidRender();
   SDL_RenderPresent(renderer);
 }
 
@@ -135,7 +140,7 @@ void runGame() {
 }
 
 int main(int argc, char** argv) {
-  if (!initGame()) {
+  if (!initSDL()) {
     printf("Failed to init\n");
     return 1;
   }
