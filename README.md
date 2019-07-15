@@ -33,6 +33,8 @@ http://localhost:8080/
 
 * Read ECS articles
   https://www.richardlord.net/blog/ecs/
+* Read skipped tutorials
+  * 16 (fonts; current)
 
 ## misc notes
 
