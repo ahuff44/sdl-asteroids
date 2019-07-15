@@ -51,10 +51,19 @@ void TextureRender(Texture tex, int x, int y, SDL_Rect* clip) {
   SDL_RenderCopy(renderer, tex.tex, clip, &dest);
 }
 
-Texture helloTex;
+void TextureRenderEx(Texture tex, int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
+  SDL_Rect dest = { .x=x, .y=y, .w=tex.w, .h=tex.h };
+  if (clip != NULL) {
+    dest.w = clip->w;
+    dest.h = clip->h;
+  }
+  SDL_RenderCopyEx(renderer, tex.tex, clip, &dest, angle, center, flip);
+}
+
+Texture asteroidTex;
 bool LoadMedia() {
   bool success = true;
-  if (!TextureLoad("data/asteroid.png", &helloTex)) {
+  if (!TextureLoad("data/asteroid.png", &asteroidTex)) {
     printf("Could not load image %s\n", "data/asteroid.png");
     success = false;
   }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <SDL2/SDL.h>
 #include <SDL_image.h>
 #ifdef __EMSCRIPTEN__
@@ -14,7 +15,9 @@ const int TARGET_TICK_INTERVAL = 1000 / 30; // want 30fps
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
+#include "util.c"
 #include "media.c"
+#include "game.c"
 
 bool initGame() {
   // init SDL
@@ -25,7 +28,7 @@ bool initGame() {
   }
 
   // make window
-  window = SDL_CreateWindow("SDL Tutorial",
+  window = SDL_CreateWindow("Asteroids",
     SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
     SDL_WINDOW_SHOWN);
   if (window == NULL) {
@@ -106,11 +109,12 @@ void runForOneFrame() {
     }
   }
 
+  AsteroidUpdate();
+
   // all events for this frame have now been processed
 
   SDL_RenderClear(renderer);
-  // TextureRender(helloTex, 100, 0, &(SDL_Rect){.x=16,.y=16,.w=16,.h=16});
-  TextureRender(helloTex, 100, 0, NULL);
+  AsteroidRender();
   SDL_RenderPresent(renderer);
 }
 
@@ -132,6 +136,10 @@ void runForOneFrame() {
 #endif
 
 void runGame() {
+  InitRNG();
+  AsteroidCreate(100, 100);
+  AsteroidCreate(200, 100);
+  AsteroidCreate(300, 200);
   runGame_fork();
 }
 

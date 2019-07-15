@@ -25,7 +25,7 @@ source ~/projects/emsdk/emsdk_env.sh
 
 1. Compile the code: `./build emscripten`
 2. Refresh:
-http://localhost:8080/hello.html
+http://localhost:8080/
 
 
 
