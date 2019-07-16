@@ -111,18 +111,11 @@ void runForOneFrame() {
     }
   }
 
-  PlayerUpdate();
-  BulletUpdate();
-  AsteroidUpdate();
-  HandleCollisions();
-
   // all events for this frame have now been processed
 
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
   SDL_RenderClear(renderer);
-  PlayerRender();
-  BulletRender();
-  AsteroidRender();
+  ProcessAll();
   SDL_RenderPresent(renderer);
 }
 

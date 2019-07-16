@@ -33,6 +33,9 @@ int saneMod(int x, int m) {
 int taxicabDist(SDL_Point a, SDL_Point b) {
   return abs(a.x - b.x) + abs(a.y - b.y);
 }
+int taxicabDist2(int x1, int y1, int x2, int y2) {
+  return abs(x1 - x2) + abs(y1 - y2);
+}
 
 bool arrayHas(int* arr, int len, int target) {
   for (int i = 0; i < len; ++i) {
