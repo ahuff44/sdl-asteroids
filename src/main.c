@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_ttf.h>
 #ifdef __EMSCRIPTEN__
   #include <emscripten/emscripten.h>
 #endif
@@ -97,6 +99,9 @@ void runForOneFrame() {
   while (SDL_PollEvent(&e) != 0) {
     // printf("Event code: %d\n", e.type);
     if (e.type == SDL_QUIT) {
+      setQuitGame();
+      return;
+    } else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_q) {
       setQuitGame();
       return;
     } else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r) {

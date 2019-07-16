@@ -24,3 +24,23 @@ int saneMod(int x, int m) {
   while (x >= m) { x -= m; }
   return x;
 }
+
+int taxicabDist(SDL_Point a, SDL_Point b) {
+  return abs(a.x - b.x) + abs(a.y - b.y);
+}
+
+bool arrayHas(int* arr, int len, int target) {
+  for (int i = 0; i < len; ++i) {
+    if (arr[i] == target) return true;
+  }
+  return false;
+}
+
+void memprint(size_t start, size_t len) {
+  // e.g. memprint(&myvar, sizeof(myvar));
+  for (int i = 0; i < len; ++i) {
+    Uint8 data = *((char *)(start + i));
+    printf("%02x ", data);
+  }
+  printf("\n");
+}
