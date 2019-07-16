@@ -1,5 +1,6 @@
 #include <time.h>
 
+#define ABS(x) ((x) < 0 ? -(x) : (x))
 #define MIN(x, y) ((x) <= (y) ? (x) : (y))
 #define MAX(x, y) ((x) >= (y) ? (x) : (y))
 #define CLAMP_MAX(x, max) MIN(x, max)
@@ -29,12 +30,17 @@ int saneMod(int x, int m) {
   while (x >= m) { x -= m; }
   return x;
 }
+float saneModF(float x, float m) {
+  while (x < 0) { x += m; }
+  while (x >= m) { x -= m; }
+  return x;
+}
 
 int taxicabDist(SDL_Point a, SDL_Point b) {
-  return abs(a.x - b.x) + abs(a.y - b.y);
+  return ABS(a.x - b.x) + ABS(a.y - b.y);
 }
 int taxicabDist2(int x1, int y1, int x2, int y2) {
-  return abs(x1 - x2) + abs(y1 - y2);
+  return ABS(x1 - x2) + ABS(y1 - y2);
 }
 
 bool arrayHas(int* arr, int len, int target) {

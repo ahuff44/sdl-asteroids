@@ -170,6 +170,7 @@ int num_entities;
 Entity ECSBulletCreate(float x, float y, float dx, float dy);
 Entity ECSAsteroidCreate();
 Entity ECSPlayerCreate();
+void deregisterEntity(Entity e);
 
 //
 // Components
@@ -190,8 +191,10 @@ Entity ECSPlayerCreate();
 // TODO macro this boilerplate up?:
 
 typedef enum CollisionType {
-  COLLIDE_KILL,
-  COLLIDE_DIE,
+  COLLIDE_NONE, // mainly just to avoid 0-initialization bugs
+  COLLIDE_SHIP,
+  COLLIDE_ASTEROID,
+  COLLIDE_BULLET,
 } CollisionType;
 typedef struct {
   bool initd;
@@ -296,7 +299,8 @@ bool CollideNodes[MAX_ENTITIES];
 
 bool checkDisplayDebugNode(Entity e) {
   ASSERT_VALID_ENTITIY(e);
-  return (positionCData[e].initd
+  return (getenv("DEBUG") != NULL
+       && positionCData[e].initd
        && collideCData[e].initd);
 }
 void processDisplayDebug() {
@@ -363,10 +367,24 @@ void processMove() {
 
     positionC->x += velocityC->dx;
     positionC->y += velocityC->dy;
-    if (velocityC->wrap) positionC->x = saneMod(positionC->x, SCREEN_WIDTH);
-    if (velocityC->wrap) positionC->y = saneMod(positionC->y, SCREEN_HEIGHT);
+    float wrapX = saneModF(positionC->x, SCREEN_WIDTH);
+    float wrapY = saneModF(positionC->y, SCREEN_HEIGHT);
+    if (positionC->x != wrapX) {
+      if (velocityC->wrap) {
+        positionC->x = wrapX;
+      } else {
+        deregisterEntity(i);
+      }
+    }
+    if (positionC->y != wrapY) {
+      if (velocityC->wrap) {
+        positionC->y = wrapY;
+      } else {
+        deregisterEntity(i);
+      }
+    }
 
-    positionC->t = saneMod(positionC->t + velocityC->dt, 360);
+    positionC->t = saneModF(positionC->t + velocityC->dt, 360);
   }
 }
 
@@ -438,32 +456,40 @@ void processCollide() {
     if (!CollideNodes[i]) continue;
     PositionC* iPositionC = &positionCData[i];
     CollideC* iCollideC = &collideCData[i];
+    SDL_Rect iRect = iCollideC->rect;
+    iRect.x += iPositionC->x;
+    iRect.y += iPositionC->y;
     for (int j = i+1; j < MAX_ENTITIES; ++j) {
       if (!CollideNodes[j]) continue;
       PositionC* jPositionC = &positionCData[j];
       CollideC* jCollideC = &collideCData[j];
+      SDL_Rect jRect = jCollideC->rect;
+      jRect.x += jPositionC->x;
+      jRect.y += jPositionC->y;
 
-      // if (SDL_HasIntersection(iCollideC.rect, jCollideC.rect) == SDL_TRUE) {
-      //   if (iCollideC->type == COLLIDE_KILL && jCollideC->type == COLLIDE_DIE) {
-      //     deregisterEntity(j);
-      //   }
-      //   if (iCollideC->type == COLLIDE_DIE && jCollideC->type == COLLIDE_KILL) {
-      //     deregisterEntity(i);
-      //   }
-      //   // @TODO too simple; asteroids sometimes kill but sometimes die
-      // }
+      if (SDL_HasIntersection(&iRect, &jRect) != SDL_TRUE) continue;
+
+      if (iCollideC->type == COLLIDE_SHIP && jCollideC->type == COLLIDE_ASTEROID) {
+        deregisterEntity(i);
+      } else if (iCollideC->type == COLLIDE_ASTEROID && jCollideC->type == COLLIDE_SHIP) {
+        deregisterEntity(j);
+      } else if (iCollideC->type == COLLIDE_BULLET && jCollideC->type == COLLIDE_ASTEROID) {
+        deregisterEntity(i);
+        deregisterEntity(j);
+      } else if (iCollideC->type == COLLIDE_ASTEROID && jCollideC->type == COLLIDE_BULLET) {
+        deregisterEntity(i);
+        deregisterEntity(j);
+      }
     }
   }
 }
-// @todo
-//   deregister needs to wait until end of frame
-//   bullets offscreen need to deregister
 
 //
 // Engine
 //
 
 Entity preregisterEntity() {
+  printf("num_entities: %d\n", num_entities);
   // returns -1 if no entity slots left
   if (num_entities >= MAX_ENTITIES) {
     return -1;
@@ -483,7 +509,21 @@ void registerEntity(Entity e) {
   if (checkCollideNode(e)) { CollideNodes[e] = true; }
 }
 
+Entity* toKill = NULL;
+void _frameDeregisterInit() {
+  buf_clear(toKill);
+}
+bool alreadyKilled(Entity e) {
+  for (size_t i = 0; i < buf_len(toKill); ++i) {
+    if (toKill[i] == e) return true;
+  }
+  return false;
+}
 void deregisterEntity(Entity e) {
+  ASSERT_VALID_ENTITIY(e);
+  if (!alreadyKilled(e)) buf_push(toKill, e);
+}
+void _deregisterEntityFRD(Entity e) {
   ASSERT_VALID_ENTITIY(e);
 
   // zero out components
@@ -504,8 +544,21 @@ void deregisterEntity(Entity e) {
   InputShootNodes[e] = false;
   CollideNodes[e] = false;
 }
+void _deregisterFRD() {
+  for (size_t i = 0; i < buf_len(toKill); ++i) {
+    Entity e = toKill[i];
+    ASSERT_VALID_ENTITIY(e);
+
+    // CollideC* collideC = &collideCData[e];
+    // assert(collideC->initd);
+    // printf("Killing %d (type %d)\n", e, collideC->type);
+    _deregisterEntityFRD(e);
+  }
+}
 
 void ProcessAll() {
+  _frameDeregisterInit();
+
   const Uint8* state = SDL_GetKeyboardState(NULL);
   processDisplayDebug();
   processDisplay();
@@ -514,6 +567,8 @@ void ProcessAll() {
   processInputMove(state);
   processInputShoot(state);
   processCollide();
+
+  _deregisterFRD();
 }
 
 void ZeroECS() {
@@ -559,7 +614,7 @@ Entity ECSPlayerCreate() {
   attachPositionC(e, (PositionC){.x=SCREEN_WIDTH/2, .y=SCREEN_HEIGHT/2, .t=0});
   attachVelocityC(e, (VelocityC){.dx=0, .dy=0, .dt=0, .wrap=true});
   attachDisplayC(e, (DisplayC){.tex=shipTex});
-  attachCollideC(e, (CollideC){.rect=CollisionMask2(shipTex, 12)});
+  attachCollideC(e, (CollideC){.rect=CollisionMask2(shipTex, 12), .type=COLLIDE_SHIP});
   attachRecvMoveC(e, (RecvMoveC){});
   attachRecvShootC(e, (RecvShootC){});
   registerEntity(e);
@@ -570,8 +625,8 @@ Entity ECSAsteroidCreate() {
   Entity e = preregisterEntity();
 
   // figure out position
-  PositionC playerPositionC = positionCData[player];
-  assert(playerPositionC.initd);
+  PositionC* playerPositionC = &positionCData[player];
+  assert(playerPositionC->initd);
 
   int x;
   int y;
@@ -579,14 +634,14 @@ Entity ECSAsteroidCreate() {
     x = randInt(SCREEN_WIDTH);
     y = randInt(SCREEN_HEIGHT);
   } while (
-    taxicabDist2(x, y, playerPositionC.x, playerPositionC.y) < 300
+    taxicabDist2(x, y, playerPositionC->x, playerPositionC->y) < 300
   );
 
   // attach components
   attachPositionC(e, (PositionC){.x=x, .y=y, .t=randInt(360)});
   attachVelocityC(e, (VelocityC){.dx=randIntIn(-5, 6), .dy=randIntIn(-5, 6), .dt=randIntIn(-5, 6), .wrap=true});
   attachDisplayC(e, (DisplayC){.tex=asteroidTex});
-  attachCollideC(e, (CollideC){.rect=CollisionMask2(asteroidTex, 2)});
+  attachCollideC(e, (CollideC){.rect=CollisionMask2(asteroidTex, 2), .type=COLLIDE_ASTEROID});
 
   registerEntity(e);
   return e;
@@ -596,7 +651,14 @@ Entity ECSBulletCreate(float x, float y, float dx, float dy) {
   Entity e = preregisterEntity();
   attachPositionC(e, (PositionC){.x=x, .y=y, .t=0});
   attachVelocityC(e, (VelocityC){.dx=dx, .dy=dy, .dt=0, .wrap=false});
-  attachCollideC(e, (CollideC){.rect=(SDL_Rect){.x=-dx, .y=-dy, .w=dx, .h=dy}});
+
+  float x1 = 0;
+  float y1 = 0;
+  float x2 = dx;
+  float y2 = dy;
+  SDL_Rect rect = {.x=MIN(x1, x2)-dx, .y=MIN(y1, y2)-dy, .w=ABS(dx), .h=ABS(dy)};
+
+  attachCollideC(e, (CollideC){.rect=rect, .type=COLLIDE_BULLET});
   attachDisplayBulletC(e, (DisplayBulletC){});
   registerEntity(e);
   return e;

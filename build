@@ -15,7 +15,7 @@ OFILE_EM = "out/index.html"
 SHELL_FILE = "src/shell.html"
 COMPILE = "clang {ENTRY} -o {OFILE} -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Frameworks/SDL2_image.framework/Headers -I ~/Library/Frameworks/SDL2_mixer.framework/Headers -I ~/Library/Frameworks/SDL2_ttf.framework/Headers -F ~/Library/Frameworks -framework SDL2 -framework SDL2_Image -framework SDL2_Mixer -framework SDL2_TTF".format(**locals())
 options = {
-  "": "{COMPILE} && {OFILE}".format(**locals()),
+  "": "{COMPILE} && DEBUG=1 {OFILE}".format(**locals()),
   "clean": "trash out/* && ls -l out/",
   "compile": COMPILE,
   "emscripten": "emcc {ENTRY} -o {OFILE_EM} --preload-file data --use-preload-plugins --shell-file {SHELL_FILE} -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_MIXER=2 -s USE_SDL_TTF=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s TOTAL_MEMORY=512MB".format(**locals()),
