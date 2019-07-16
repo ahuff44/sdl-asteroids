@@ -4,34 +4,6 @@
 //   float dx;
 //   float dy;
 //   float t; // angle
-// } Bullet;
-
-// Bullet bullets[128];
-// int bullet_count;
-// void BulletCreate(float x, float y, float dx, float dy) {
-//   Bullet *out = &bullets[bullet_count++];
-//   out->x = x;
-//   out->y = y;
-//   out->dx = dx;
-//   out->dy = dy;
-// }
-
-// void BulletUpdate() {
-//   for (int i = 0; i < bullet_count; ++i) {
-//     Bullet* b = &bullets[i];
-//     b->x += b->dx;
-//     b->y += b->dy;
-//   }
-// }
-
-
-
-// typedef struct {
-//   float x;
-//   float y;
-//   float dx;
-//   float dy;
-//   float t; // angle
 //   int cooldown; // shoot cooldown
 //   bool dead;
 // } Ship;
@@ -46,39 +18,6 @@
 //   out->t = 0;
 //   out->cooldown = 0;
 //   out->dead = false;
-// }
-
-// void PlayerCreate() {
-//   ShipCreate(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, &player);
-// }
-
-// void PlayerInput() {
-//   const Uint8* state = SDL_GetKeyboardState(NULL);
-//   if (state[SDL_SCANCODE_UP]) {
-//     double pi = acos(-1);
-//     player.dx += 0.4*cos(player.t * (pi/180));
-//     player.dy += 0.4*sin(player.t * (pi/180));
-//   }
-//   if (state[SDL_SCANCODE_DOWN]) {
-//     double pi = acos(-1);
-//     player.dx -= 0.4*cos(player.t * (pi/180));
-//     player.dy -= 0.4*sin(player.t * (pi/180));
-//   }
-//   if (state[SDL_SCANCODE_RIGHT]) {
-//     player.t += 5;
-//   }
-//   if (state[SDL_SCANCODE_LEFT]) {
-//     player.t -= 5;
-//   }
-//   if (state[SDL_SCANCODE_SPACE]) {
-//     if (player.cooldown == 0) {
-//       double pi = acos(-1);
-//       float dx = 10*cos(player.t * (pi/180));
-//       float dy = 10*sin(player.t * (pi/180));
-//       BulletCreate(player.x, player.y, dx, dy);
-//       player.cooldown = SHOOT_COOLDOWN;
-//     }
-//   }
 // }
 
 // void PlayerUpdate() {
@@ -96,32 +35,6 @@
 
 
 
-// typedef struct {
-//   float x;
-//   float y;
-//   float dx;
-//   float dy;
-//   float t; // angle
-//   float dt;
-// } Asteroid;
-
-// Asteroid asteroids[128] = {};
-// int asteroid_count = 0;
-// void AsteroidCreate() {
-//   assert(memcmp(&player, &(Ship){0}, sizeof(player)) != 0); // assert(player is initialized)
-//   Asteroid *out = &asteroids[asteroid_count++];
-//   do {
-//     out->x = randInt(SCREEN_WIDTH);
-//     out->y = randInt(SCREEN_HEIGHT);
-//   } while (
-//     taxicabDist((SDL_Point){.x=out->x, .y=out->y}, (SDL_Point){.x=player.x, .y=player.y}) < 300
-//   );
-//   out->dx = randIntIn(-5, 6);
-//   out->dy = randIntIn(-5, 6);
-//   out->t = randInt(360);
-//   out->dt = randIntIn(-5, 6);
-// }
-
 // void AsteroidUpdate() {
 //   for (int i = 0; i < asteroid_count; ++i) {
 //     Asteroid* a = &asteroids[i];
@@ -131,27 +44,15 @@
 //   }
 // }
 
-// void AsteroidRender() {
-//   for (int i = 0; i < asteroid_count; ++i) {
-//     Asteroid a = asteroids[i];
-//     TextureRenderEx(asteroidTex, a.x-asteroidTex.w/2, a.y-asteroidTex.h/2, NULL, a.t, NULL, SDL_FLIP_NONE);
-//   }
-// }
 
 
 
-// void BulletRender() {
-//   for (int i = 0; i < bullet_count; ++i) {
-//     Bullet a = bullets[i];
-//     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-//     SDL_RenderDrawLine(renderer, a.x-a.dx, a.y-a.dy, a.x, a.y);
-//   }
-// }
 
 
-
-SDL_Rect CollisionMask(Texture tex, float x, float y, int border) {
-  return (SDL_Rect){.x=x+border, .y=y+border, .w=tex.w-border*2, .h=tex.h-border*2};
+SDL_Rect CollisionMask2(Texture tex, int border) {
+  int hw = tex.w/2 - border;
+  int hh = tex.h/2 - border;
+  return (SDL_Rect){.x=-hw, .y=-hh, .w=2*hw, .h=2*hh};
 }
 
 // void HandleCollisions() {
@@ -264,6 +165,13 @@ const int MAX_ENTITIES = 256;
 int num_entities;
 
 //
+// forward declares
+//
+Entity ECSBulletCreate(float x, float y, float dx, float dy);
+Entity ECSAsteroidCreate();
+Entity ECSPlayerCreate();
+
+//
 // Components
 //
 
@@ -282,10 +190,9 @@ int num_entities;
 // TODO macro this boilerplate up?:
 
 typedef enum CollisionType {
-  COLLIDE_DEAL_DAMAGE,
-  COLLIDE_TAKE_DAMAGE,
+  COLLIDE_KILL,
+  COLLIDE_DIE,
 } CollisionType;
-
 typedef struct {
   bool initd;
   SDL_Rect rect;
@@ -303,9 +210,9 @@ typedef struct {
 
 typedef struct {
   bool initd;
-  int x;
-  int y;
-  int t; // angle
+  float x;
+  float y;
+  float t; // angle
 } PositionC;
 
 typedef struct {
@@ -314,13 +221,15 @@ typedef struct {
 
 typedef struct {
   bool initd;
+  int cooldown;
 } RecvShootC;
 
 typedef struct {
   bool initd;
-  int dx;
-  int dy;
-  int dt;
+  float dx;
+  float dy;
+  float dt;
+  bool wrap;
 } VelocityC;
 
 CollideC collideCData[MAX_ENTITIES];
@@ -391,12 +300,17 @@ bool checkDisplayDebugNode(Entity e) {
        && collideCData[e].initd);
 }
 void processDisplayDebug() {
+  SDL_SetRenderDrawColor(renderer, 0xFF, 0, 0, 0xFF);
+
   for (int i = 0; i < MAX_ENTITIES; ++i) {
     if (!DisplayDebugNodes[i]) continue;
     PositionC* positionC = &positionCData[i];
     CollideC* collideC = &collideCData[i];
 
-    // @TODO
+    SDL_Rect rect = collideC->rect;
+    rect.x += positionC->x;
+    rect.y += positionC->y;
+    SDL_RenderDrawRect(renderer, &rect);
   }
 }
 
@@ -411,7 +325,9 @@ void processDisplay() {
     PositionC* positionC = &positionCData[i];
     DisplayC* displayC = &displayCData[i];
 
-    TextureRenderEx(displayC->tex, positionC->x-displayC->tex.w/2, positionC->y-displayC->tex.h/2, NULL, positionC->t, NULL, SDL_FLIP_NONE);
+    int x = positionC->x-displayC->tex.w/2;
+    int y = positionC->y-displayC->tex.h/2;
+    TextureRenderEx(displayC->tex, x, y, NULL, positionC->t, NULL, SDL_FLIP_NONE);
   }
 }
 
@@ -422,12 +338,15 @@ bool checkDisplayBulletNode(Entity e) {
        && displayBulletCData[e].initd);
 }
 void processDisplayBullet() {
+  SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
   for (int i = 0; i < MAX_ENTITIES; ++i) {
     if (!DisplayBulletNodes[i]) continue;
     PositionC* positionC = &positionCData[i];
     VelocityC* velocityC = &velocityCData[i];
     DisplayBulletC* displayBulletC = &displayBulletCData[i];
-    // @TODO
+
+    SDL_RenderDrawLine(renderer, positionC->x-velocityC->dx, positionC->y-velocityC->dy, positionC->x, positionC->y);
   }
 }
 
@@ -444,22 +363,42 @@ void processMove() {
 
     positionC->x += velocityC->dx;
     positionC->y += velocityC->dy;
-    positionC->t += velocityC->dt;
+    if (velocityC->wrap) positionC->x = saneMod(positionC->x, SCREEN_WIDTH);
+    if (velocityC->wrap) positionC->y = saneMod(positionC->y, SCREEN_HEIGHT);
+
+    positionC->t = saneMod(positionC->t + velocityC->dt, 360);
   }
 }
 
 bool checkInputMoveNode(Entity e) {
   ASSERT_VALID_ENTITIY(e);
   return (recvMoveCData[e].initd
+       && positionCData[e].initd
        && velocityCData[e].initd);
 }
 void processInputMove(const Uint8* state) {
   for (int i = 0; i < MAX_ENTITIES; ++i) {
     if (!InputMoveNodes[i]) continue;
     RecvMoveC* recvMoveC = &recvMoveCData[i];
+    PositionC* positionC = &positionCData[i];
     VelocityC* velocityC = &velocityCData[i];
 
-    // @TODO
+    if (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W]) {
+      double pi = acos(-1);
+      velocityC->dx += 0.4*cos(positionC->t * (pi/180));
+      velocityC->dy += 0.4*sin(positionC->t * (pi/180));
+    }
+    if (state[SDL_SCANCODE_DOWN]) {
+      double pi = acos(-1);
+      velocityC->dx -= 0.4*cos(positionC->t * (pi/180));
+      velocityC->dy -= 0.4*sin(positionC->t * (pi/180));
+    }
+    if (state[SDL_SCANCODE_RIGHT]) {
+      positionC->t += 5;
+    }
+    if (state[SDL_SCANCODE_LEFT]) {
+      positionC->t -= 5;
+    }
   }
 }
 
@@ -469,12 +408,23 @@ bool checkInputShootNode(Entity e) {
        && positionCData[e].initd);
 }
 void processInputShoot(const Uint8* state) {
+  const int SHOOT_COOLDOWN = 10; // frames
+
   for (int i = 0; i < MAX_ENTITIES; ++i) {
     if (!InputShootNodes[i]) continue;
     RecvShootC* recvShootC = &recvShootCData[i];
     PositionC* positionC = &positionCData[i];
 
-    // @TODO
+    if (recvShootC->cooldown > 0) recvShootC->cooldown--;
+    if (state[SDL_SCANCODE_SPACE]) {
+      if (recvShootC->cooldown == 0) {
+        recvShootC->cooldown = SHOOT_COOLDOWN;
+        double pi = acos(-1);
+        float dx = 10*cos(positionC->t * (pi/180));
+        float dy = 10*sin(positionC->t * (pi/180));
+        ECSBulletCreate(positionC->x, positionC->y, dx, dy);
+      }
+    }
   }
 }
 
@@ -486,12 +436,28 @@ bool checkCollideNode(Entity e) {
 void processCollide() {
   for (int i = 0; i < MAX_ENTITIES; ++i) {
     if (!CollideNodes[i]) continue;
-    PositionC* positionC = &positionCData[i];
-    CollideC* collideC = &collideCData[i];
+    PositionC* iPositionC = &positionCData[i];
+    CollideC* iCollideC = &collideCData[i];
+    for (int j = i+1; j < MAX_ENTITIES; ++j) {
+      if (!CollideNodes[j]) continue;
+      PositionC* jPositionC = &positionCData[j];
+      CollideC* jCollideC = &collideCData[j];
 
-    // @TODO
+      // if (SDL_HasIntersection(iCollideC.rect, jCollideC.rect) == SDL_TRUE) {
+      //   if (iCollideC->type == COLLIDE_KILL && jCollideC->type == COLLIDE_DIE) {
+      //     deregisterEntity(j);
+      //   }
+      //   if (iCollideC->type == COLLIDE_DIE && jCollideC->type == COLLIDE_KILL) {
+      //     deregisterEntity(i);
+      //   }
+      //   // @TODO too simple; asteroids sometimes kill but sometimes die
+      // }
+    }
   }
 }
+// @todo
+//   deregister needs to wait until end of frame
+//   bullets offscreen need to deregister
 
 //
 // Engine
@@ -550,6 +516,28 @@ void ProcessAll() {
   processCollide();
 }
 
+void ZeroECS() {
+  // zero out components
+  memset(&collideCData, 0, sizeof(collideCData));
+  memset(&displayCData, 0, sizeof(displayCData));
+  memset(&displayBulletCData, 0, sizeof(displayBulletCData));
+  memset(&positionCData, 0, sizeof(positionCData));
+  memset(&recvMoveCData, 0, sizeof(recvMoveCData));
+  memset(&recvShootCData, 0, sizeof(recvShootCData));
+  memset(&velocityCData, 0, sizeof(velocityCData));
+
+  // zero out nodes
+  memset(&DisplayDebugNodes, 0, sizeof(DisplayDebugNodes));
+  memset(&DisplayNodes, 0, sizeof(DisplayNodes));
+  memset(&DisplayBulletNodes, 0, sizeof(DisplayBulletNodes));
+  memset(&MoveNodes, 0, sizeof(MoveNodes));
+  memset(&InputMoveNodes, 0, sizeof(InputMoveNodes));
+  memset(&InputShootNodes, 0, sizeof(InputShootNodes));
+  memset(&CollideNodes, 0, sizeof(CollideNodes));
+
+  num_entities = 0;
+}
+
 
 
 //
@@ -557,11 +545,23 @@ void ProcessAll() {
 //
 
 Entity player;
+void InitGame() {
+  ZeroECS();
+
+  player = ECSPlayerCreate();
+  for (int i = 0; i < 10; ++i) {
+    ECSAsteroidCreate();
+  }
+}
 
 Entity ECSPlayerCreate() {
   Entity e = preregisterEntity();
   attachPositionC(e, (PositionC){.x=SCREEN_WIDTH/2, .y=SCREEN_HEIGHT/2, .t=0});
+  attachVelocityC(e, (VelocityC){.dx=0, .dy=0, .dt=0, .wrap=true});
   attachDisplayC(e, (DisplayC){.tex=shipTex});
+  attachCollideC(e, (CollideC){.rect=CollisionMask2(shipTex, 12)});
+  attachRecvMoveC(e, (RecvMoveC){});
+  attachRecvShootC(e, (RecvShootC){});
   registerEntity(e);
   return e;
 }
@@ -584,16 +584,20 @@ Entity ECSAsteroidCreate() {
 
   // attach components
   attachPositionC(e, (PositionC){.x=x, .y=y, .t=randInt(360)});
-  attachVelocityC(e, (VelocityC){.dx=randIntIn(-5, 6), .dy=randIntIn(-5, 6), .dt=randIntIn(-5, 6)});
+  attachVelocityC(e, (VelocityC){.dx=randIntIn(-5, 6), .dy=randIntIn(-5, 6), .dt=randIntIn(-5, 6), .wrap=true});
   attachDisplayC(e, (DisplayC){.tex=asteroidTex});
+  attachCollideC(e, (CollideC){.rect=CollisionMask2(asteroidTex, 2)});
 
   registerEntity(e);
   return e;
 }
 
-void InitGame() {
-  player = ECSPlayerCreate();
-  for (int i = 0; i < 10; ++i) {
-    ECSAsteroidCreate();
-  }
+Entity ECSBulletCreate(float x, float y, float dx, float dy) {
+  Entity e = preregisterEntity();
+  attachPositionC(e, (PositionC){.x=x, .y=y, .t=0});
+  attachVelocityC(e, (VelocityC){.dx=dx, .dy=dy, .dt=0, .wrap=false});
+  attachCollideC(e, (CollideC){.rect=(SDL_Rect){.x=-dx, .y=-dy, .w=dx, .h=dy}});
+  attachDisplayBulletC(e, (DisplayBulletC){});
+  registerEntity(e);
+  return e;
 }
