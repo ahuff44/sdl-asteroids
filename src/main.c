@@ -20,6 +20,8 @@ SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
 #include "util.c"
+#include "buf.c"
+#include "map.c"
 #include "media.c"
 #include "game.c"
 
