@@ -36,10 +36,7 @@ float saneModF(float x, float m) {
   return x;
 }
 
-int taxicabDist(SDL_Point a, SDL_Point b) {
-  return ABS(a.x - b.x) + ABS(a.y - b.y);
-}
-int taxicabDist2(int x1, int y1, int x2, int y2) {
+int taxicabDist(int x1, int y1, int x2, int y2) {
   return ABS(x1 - x2) + ABS(y1 - y2);
 }
 

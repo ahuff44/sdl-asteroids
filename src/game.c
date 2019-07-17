@@ -1,6 +1,6 @@
 bool DRAW_DEBUG;
 
-SDL_Rect CollisionMask2(Texture tex, int border) {
+SDL_Rect CollisionMask(Texture tex, int border) {
   int hw = tex.w/2 - border;
   int hh = tex.h/2 - border;
   return (SDL_Rect){.x=-hw, .y=-hh, .w=2*hw, .h=2*hh};
@@ -554,7 +554,7 @@ Entity ECSPlayerCreate(void) {
   attachPositionC(e, (PositionC){.x=SCREEN_WIDTH/2, .y=SCREEN_HEIGHT/2, .t=0});
   attachVelocityC(e, (VelocityC){.dx=0, .dy=0, .dt=0, .wrap=true});
   attachDisplayC(e, (DisplayC){.tex=shipTex});
-  attachCollideC(e, (CollideC){.rect=CollisionMask2(shipTex, 12), .type=COLLIDE_SHIP});
+  attachCollideC(e, (CollideC){.rect=CollisionMask(shipTex, 12), .type=COLLIDE_SHIP});
   attachRecvMoveC(e, (RecvMoveC){});
   attachRecvShootC(e, (RecvShootC){});
   registerEntity(e);
@@ -574,14 +574,14 @@ Entity ECSAsteroidCreate(void) {
     x = randInt(SCREEN_WIDTH);
     y = randInt(SCREEN_HEIGHT);
   } while (
-    taxicabDist2(x, y, playerPositionC->x, playerPositionC->y) < 300
+    taxicabDist(x, y, playerPositionC->x, playerPositionC->y) < 300
   );
 
   // attach components
   attachPositionC(e, (PositionC){.x=x, .y=y, .t=randInt(360)});
   attachVelocityC(e, (VelocityC){.dx=randIntIn(-5, 6), .dy=randIntIn(-5, 6), .dt=randIntIn(-5, 6), .wrap=true});
   attachDisplayC(e, (DisplayC){.tex=asteroidTex});
-  attachCollideC(e, (CollideC){.rect=CollisionMask2(asteroidTex, 2), .type=COLLIDE_ASTEROID});
+  attachCollideC(e, (CollideC){.rect=CollisionMask(asteroidTex, 2), .type=COLLIDE_ASTEROID});
 
   registerEntity(e);
   return e;
