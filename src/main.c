@@ -25,7 +25,7 @@ SDL_Renderer* renderer = NULL;
 #include "media.c"
 #include "game.c"
 
-bool initSDL() {
+bool initSDL(void) {
   // init SDL
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     printf("SDL error: %s\n", SDL_GetError());
@@ -63,7 +63,7 @@ bool initSDL() {
   return true;
 }
 
-void closeGame() {
+void closeGame(void) {
   FreeMedia();
 
   SDL_DestroyRenderer(renderer);
@@ -96,7 +96,7 @@ bool _quitGame = false;
   }
 #endif
 
-void runForOneFrame() {
+void runForOneFrame(void) {
   SDL_Event e;
   while (SDL_PollEvent(&e) != 0) {
     // printf("Event code: %d\n", e.type);
@@ -136,7 +136,7 @@ void runForOneFrame() {
   }
 #endif
 
-void runGame() {
+void runGame(void) {
   InitRNG();
   InitGame();
   runGame_fork();

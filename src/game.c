@@ -60,10 +60,10 @@ int num_entities;
 //
 // forward declares
 //
-Entity ECSDebugCreate();
+Entity ECSDebugCreate(void);
 Entity ECSBulletCreate(float x, float y, float dx, float dy);
-Entity ECSAsteroidCreate();
-Entity ECSPlayerCreate();
+Entity ECSAsteroidCreate(void);
+Entity ECSPlayerCreate(void);
 void deregisterEntity(Entity e);
 
 //
@@ -196,7 +196,7 @@ bool checkDisplayDebugNode(Entity e) {
   return (positionCData[e].initd
        && collideCData[e].initd);
 }
-void processDisplayDebug() {
+void processDisplayDebug(void) {
   if (!DRAW_DEBUG) return;
   SDL_SetRenderDrawColor(renderer, 0xFF, 0, 0, 0xFF);
 
@@ -217,7 +217,7 @@ bool checkDisplayNode(Entity e) {
   return (positionCData[e].initd
        && displayCData[e].initd);
 }
-void processDisplay() {
+void processDisplay(void) {
   for (int i = 0; i < MAX_ENTITIES; ++i) {
     if (!DisplayNodes[i]) continue;
     PositionC* positionC = &positionCData[i];
@@ -235,7 +235,7 @@ bool checkDisplayBulletNode(Entity e) {
        && velocityCData[e].initd
        && displayBulletCData[e].initd);
 }
-void processDisplayBullet() {
+void processDisplayBullet(void) {
   SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
   for (int i = 0; i < MAX_ENTITIES; ++i) {
@@ -253,7 +253,7 @@ bool checkMoveNode(Entity e) {
   return (positionCData[e].initd
        && velocityCData[e].initd);
 }
-void processMove() {
+void processMove(void) {
   for (int i = 0; i < MAX_ENTITIES; ++i) {
     if (!MoveNodes[i]) continue;
     PositionC* positionC = &positionCData[i];
@@ -361,7 +361,7 @@ bool checkCollideNode(Entity e) {
   return (positionCData[e].initd
        && collideCData[e].initd);
 }
-void processCollide() {
+void processCollide(void) {
   for (int i = 0; i < MAX_ENTITIES; ++i) {
     if (!CollideNodes[i]) continue;
     PositionC* iPositionC = &positionCData[i];
@@ -414,7 +414,7 @@ void processCollide() {
 // Engine
 //
 
-Entity preregisterEntity() {
+Entity preregisterEntity(void) {
   printf("num_entities: %d\n", num_entities);
   // returns -1 if no entity slots left
   if (num_entities >= MAX_ENTITIES) {
@@ -437,7 +437,7 @@ void registerEntity(Entity e) {
 }
 
 Entity* toKill = NULL;
-void _frameDeregisterInit() {
+void _frameDeregisterInit(void) {
   buf_clear(toKill);
 }
 bool alreadyKilled(Entity e) {
@@ -473,7 +473,7 @@ void _deregisterEntityFRD(Entity e) {
   InputDebugNodes[e] = false;
   CollideNodes[e] = false;
 }
-void _deregisterFRD() {
+void _deregisterFRD(void) {
   for (size_t i = 0; i < buf_len(toKill); ++i) {
     Entity e = toKill[i];
     ASSERT_VALID_ENTITIY(e);
@@ -485,7 +485,7 @@ void _deregisterFRD() {
   }
 }
 
-void ProcessAll() {
+void ProcessAll(void) {
   _frameDeregisterInit();
 
   const Uint8* state = SDL_GetKeyboardState(NULL);
@@ -501,7 +501,7 @@ void ProcessAll() {
   _deregisterFRD();
 }
 
-void ZeroECS() {
+void ZeroECS(void) {
   // zero out components
   memset(&collideCData, 0, sizeof(collideCData));
   memset(&displayCData, 0, sizeof(displayCData));
@@ -532,7 +532,7 @@ void ZeroECS() {
 //
 
 Entity player;
-void InitGame() {
+void InitGame(void) {
   ZeroECS();
   ECSDebugCreate();
 
@@ -542,14 +542,14 @@ void InitGame() {
   }
 }
 
-Entity ECSDebugCreate() {
+Entity ECSDebugCreate(void) {
   Entity e = preregisterEntity();
   attachRecvDebugC(e, (RecvDebugC){});
   registerEntity(e);
   return e;
 }
 
-Entity ECSPlayerCreate() {
+Entity ECSPlayerCreate(void) {
   Entity e = preregisterEntity();
   attachPositionC(e, (PositionC){.x=SCREEN_WIDTH/2, .y=SCREEN_HEIGHT/2, .t=0});
   attachVelocityC(e, (VelocityC){.dx=0, .dy=0, .dt=0, .wrap=true});
@@ -561,7 +561,7 @@ Entity ECSPlayerCreate() {
   return e;
 }
 
-Entity ECSAsteroidCreate() {
+Entity ECSAsteroidCreate(void) {
   Entity e = preregisterEntity();
 
   // figure out position

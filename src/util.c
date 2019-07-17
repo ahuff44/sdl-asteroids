@@ -6,7 +6,7 @@
 #define CLAMP_MAX(x, max) MIN(x, max)
 #define CLAMP_MIN(x, min) MAX(x, min)
 
-void InitRNG() {
+void InitRNG(void) {
   srand(time(NULL));
 }
 
