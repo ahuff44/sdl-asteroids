@@ -2,10 +2,12 @@
 
 // untested!!!
 
-typedef struct {
+#if INTERFACE
+struct MapEntry {
   int key;
   int val;
-} MapEntry;
+};
+#endif
 
 MapEntry* map_new() {
   MapEntry* map = NULL;

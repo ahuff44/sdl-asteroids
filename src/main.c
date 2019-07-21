@@ -11,14 +11,11 @@
   #include <emscripten/emscripten.h>
 #endif
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-const int TARGET_FPS = 30;
-const int TARGET_TICK_INTERVAL = 1000 / TARGET_FPS;
-
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
+#include "constants.h"
+#include "headers.h"
 #include "util.c"
 #include "buf.c"
 #include "map.c"

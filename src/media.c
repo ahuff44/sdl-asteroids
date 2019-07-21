@@ -1,9 +1,11 @@
+#if INTERFACE
 // pass this around by value; it's small
-typedef struct {
+struct Texture{
   SDL_Texture* tex;
   int w;
   int h;
-} Texture;
+};
+#endif
 
 // Texture* _TextureAlloc() {
 //   size_t size = sizeof(Texture);

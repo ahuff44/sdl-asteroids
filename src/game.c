@@ -50,21 +50,13 @@ processes
     collide
 */
 
+#if INTERFACE
 typedef int Entity;
+#endif
 
-const int MAX_ENTITIES = 256;
 #define ASSERT_VALID_ENTITIY(e) (assert(0 <= (e) && (e) < MAX_ENTITIES))
 
 int num_entities;
-
-//
-// forward declares
-//
-Entity ECSDebugCreate(void);
-Entity ECSBulletCreate(float x, float y, float dx, float dy);
-Entity ECSAsteroidCreate(void);
-Entity ECSPlayerCreate(void);
-void deregisterEntity(Entity e);
 
 //
 // Components
@@ -72,54 +64,56 @@ void deregisterEntity(Entity e);
 
 // TODO macro this boilerplate up?:
 
-typedef enum CollisionType {
+#if INTERFACE
+enum CollisionType {
   COLLIDE_NONE, // mainly just to avoid 0-initialization bugs
   COLLIDE_SHIP,
   COLLIDE_ASTEROID,
   COLLIDE_BULLET,
-} CollisionType;
-typedef struct {
+};
+struct CollideC {
   bool initd;
   SDL_Rect rect;
   CollisionType type;
-} CollideC;
+};
 
-typedef struct {
+struct DisplayC {
   bool initd;
   Texture tex;
-} DisplayC;
+};
 
-typedef struct {
+struct DisplayBulletC {
   bool initd;
-} DisplayBulletC;
+};
 
-typedef struct {
+struct PositionC {
   bool initd;
   float x;
   float y;
   float t; // angle
-} PositionC;
+};
 
-typedef struct {
+struct RecvMoveC {
   bool initd;
-} RecvMoveC;
+};
 
-typedef struct {
+struct RecvShootC {
   bool initd;
   int cooldown;
-} RecvShootC;
+};
 
-typedef struct {
+struct RecvDebugC {
   bool initd;
-} RecvDebugC;
+};
 
-typedef struct {
+struct VelocityC {
   bool initd;
   float dx;
   float dy;
   float dt;
   bool wrap;
-} VelocityC;
+};
+#endif
 
 CollideC collideCData[MAX_ENTITIES];
 DisplayC displayCData[MAX_ENTITIES];

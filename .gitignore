@@ -1,3 +1,7 @@
 out/*
 a.out
 *.sublime-*
+src/headers.h
+
+lib/*
+!lib/*.c
