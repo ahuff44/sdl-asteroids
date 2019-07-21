@@ -16,18 +16,22 @@ SHELL_FILE = "src/shell.html"
 HEADERS = "src/headers.h"
 
 MAKEHEADERS = "./lib/makeheaders -h src/*.c > {HEADERS}".format(**locals())
-COMPILE_C = "clang {ENTRYPOINT} -o {OFILE_C} -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Frameworks/SDL2_image.framework/Headers -I ~/Library/Frameworks/SDL2_mixer.framework/Headers -I ~/Library/Frameworks/SDL2_ttf.framework/Headers -F ~/Library/Frameworks -framework SDL2 -framework SDL2_Image -framework SDL2_Mixer -framework SDL2_TTF".format(**locals())
-COMPILE_EM = "emcc {ENTRYPOINT} -o {OFILE_EM} --preload-file data --use-preload-plugins --shell-file {SHELL_FILE} -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_MIXER=2 -s USE_SDL_TTF=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s TOTAL_MEMORY=512MB".format(**locals())
+COMPILE_C = "clang {ENTRYPOINT} -o {OFILE_C} -Wall -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Frameworks/SDL2_image.framework/Headers -I ~/Library/Frameworks/SDL2_mixer.framework/Headers -I ~/Library/Frameworks/SDL2_ttf.framework/Headers -F ~/Library/Frameworks -framework SDL2 -framework SDL2_Image -framework SDL2_Mixer -framework SDL2_TTF".format(**locals())
+COMPILE_EM = "emcc {ENTRYPOINT} -o {OFILE_EM} -Wall --preload-file data --use-preload-plugins --shell-file {SHELL_FILE} -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_MIXER=2 -s USE_SDL_TTF=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s TOTAL_MEMORY=512MB".format(**locals())
 RUN_C = "DEBUG=1 {OFILE_C}".format(**locals())
 CLEAN = "trash out/* && trash {HEADERS} && ls -l out/".format(**locals())
 
 options = {
-  "": "{MAKEHEADERS} && {COMPILE_C} && {RUN_C}".format(**locals()),
+  "all": "{MAKEHEADERS} && {COMPILE_C} && {RUN_C}".format(**locals()),
+
   "clean": "{CLEAN}".format(**locals()),
   "compile": "{COMPILE_C}".format(**locals()),
+  "emscripten": "{COMPILE_EM}".format(**locals()),
   "headers": "{MAKEHEADERS}".format(**locals()),
   "lint": "{COMPILE_C} --analyze".format(**locals()),
-  "emscripten": "{COMPILE_EM}".format(**locals()),
+  "run": "{RUN_C}".format(**locals()),
+
+  "dryrun": 0,  # handled specially
 }
 
 
@@ -44,14 +48,14 @@ def matchPrefix(prefix, options):
         raise Exception("Multiple options match prefix '%s' ('%s', '%s', maybe others)"%(prefix, foundOpt, opt))
   return foundOpt
 
-if len(argv) > 2:
+
+if len(argv) > 3:
   print "Usage: ./build [{}]".format('|'.join(options.keys()))
   exit(1)
 if len(argv) == 1:
-  prefix = ""
+  prefix = "all"
 else:
   prefix = argv[1]
-
 
 match = matchPrefix(prefix, options.keys())
 if match is None:
@@ -62,6 +66,13 @@ else:
     print "need to load emcc:"
     print "\tsource ~/projects/emsdk/emsdk_env.sh"
     exit(1)
-
-  cmdstr = options[match]
-  bash(cmdstr)
+  if match == "dryrun":
+    if len(argv) == 2:
+      match = "all"
+    else:
+      match = matchPrefix(argv[2], options.keys())
+    cmdstr = options[match]
+    print cmdstr
+  else:
+    cmdstr = options[match]
+    bash(cmdstr)

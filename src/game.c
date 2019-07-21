@@ -236,7 +236,7 @@ void processDisplayBullet(void) {
     if (!DisplayBulletNodes[i]) continue;
     PositionC* positionC = &positionCData[i];
     VelocityC* velocityC = &velocityCData[i];
-    DisplayBulletC* displayBulletC = &displayBulletCData[i];
+    // DisplayBulletC* displayBulletC = &displayBulletCData[i];
 
     SDL_RenderDrawLine(renderer, positionC->x-velocityC->dx, positionC->y-velocityC->dy, positionC->x, positionC->y);
   }
@@ -285,7 +285,7 @@ bool checkInputMoveNode(Entity e) {
 void processInputMove(const Uint8* state) {
   for (int i = 0; i < MAX_ENTITIES; ++i) {
     if (!InputMoveNodes[i]) continue;
-    RecvMoveC* recvMoveC = &recvMoveCData[i];
+    // RecvMoveC* recvMoveC = &recvMoveCData[i];
     PositionC* positionC = &positionCData[i];
     VelocityC* velocityC = &velocityCData[i];
 
@@ -341,7 +341,7 @@ bool checkInputDebugNode(Entity e) {
 void processInputDebug(const Uint8* state) {
   for (int i = 0; i < MAX_ENTITIES; ++i) {
     if (!InputDebugNodes[i]) continue;
-    RecvDebugC* recvDebugC = &recvDebugCData[i];
+    // RecvDebugC* recvDebugC = &recvDebugCData[i];
 
     if (state[SDL_SCANCODE_C]) {
       DRAW_DEBUG = true;
