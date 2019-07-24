@@ -62,12 +62,17 @@ void TextureRenderEx(Texture tex, int x, int y, SDL_Rect* clip, double angle, SD
   SDL_RenderCopyEx(renderer, tex.tex, clip, &dest, angle, center, flip);
 }
 
-Texture shipTex;
 Texture asteroidTex;
+Texture asteroidBigTex;
+Texture shipTex;
 bool LoadMedia(void) {
   bool success = true;
   if (!TextureLoad("data/asteroid.png", &asteroidTex)) {
     printf("Could not load image %s\n", "data/asteroid.png");
+    success = false;
+  }
+  if (!TextureLoad("data/asteroidBig.png", &asteroidBigTex)) {
+    printf("Could not load image %s\n", "data/asteroidBig.png");
     success = false;
   }
   if (!TextureLoad("data/ship.png", &shipTex)) {
@@ -82,4 +87,6 @@ void FreeMedia(void) {
   shipTex = (Texture){0};
   SDL_DestroyTexture(asteroidTex.tex);
   asteroidTex = (Texture){0};
+  SDL_DestroyTexture(asteroidBigTex.tex);
+  asteroidBigTex = (Texture){0};
 }

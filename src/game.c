@@ -69,6 +69,7 @@ enum CollisionType {
   COLLIDE_NONE, // mainly just to avoid 0-initialization bugs
   COLLIDE_SHIP,
   COLLIDE_ASTEROID,
+  COLLIDE_BIG_ASTEROID,
   COLLIDE_BULLET,
 };
 struct CollideC {
@@ -194,7 +195,7 @@ void processDisplayDebug(void) {
   if (!DRAW_DEBUG) return;
   SDL_SetRenderDrawColor(renderer, 0xFF, 0, 0, 0xFF);
 
-  for (int i = 0; i < MAX_ENTITIES; ++i) {
+  for (int i = 0; i < num_entities; ++i) {
     if (!DisplayDebugNodes[i]) continue;
     PositionC* positionC = &positionCData[i];
     CollideC* collideC = &collideCData[i];
@@ -212,7 +213,7 @@ bool checkDisplayNode(Entity e) {
        && displayCData[e].initd);
 }
 void processDisplay(void) {
-  for (int i = 0; i < MAX_ENTITIES; ++i) {
+  for (int i = 0; i < num_entities; ++i) {
     if (!DisplayNodes[i]) continue;
     PositionC* positionC = &positionCData[i];
     DisplayC* displayC = &displayCData[i];
@@ -232,7 +233,7 @@ bool checkDisplayBulletNode(Entity e) {
 void processDisplayBullet(void) {
   SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-  for (int i = 0; i < MAX_ENTITIES; ++i) {
+  for (int i = 0; i < num_entities; ++i) {
     if (!DisplayBulletNodes[i]) continue;
     PositionC* positionC = &positionCData[i];
     VelocityC* velocityC = &velocityCData[i];
@@ -248,7 +249,7 @@ bool checkMoveNode(Entity e) {
        && velocityCData[e].initd);
 }
 void processMove(void) {
-  for (int i = 0; i < MAX_ENTITIES; ++i) {
+  for (int i = 0; i < num_entities; ++i) {
     if (!MoveNodes[i]) continue;
     PositionC* positionC = &positionCData[i];
     VelocityC* velocityC = &velocityCData[i];
@@ -283,7 +284,7 @@ bool checkInputMoveNode(Entity e) {
        && velocityCData[e].initd);
 }
 void processInputMove(const Uint8* state) {
-  for (int i = 0; i < MAX_ENTITIES; ++i) {
+  for (int i = 0; i < num_entities; ++i) {
     if (!InputMoveNodes[i]) continue;
     // RecvMoveC* recvMoveC = &recvMoveCData[i];
     PositionC* positionC = &positionCData[i];
@@ -316,7 +317,7 @@ bool checkInputShootNode(Entity e) {
 void processInputShoot(const Uint8* state) {
   const int SHOOT_COOLDOWN = 10; // frames
 
-  for (int i = 0; i < MAX_ENTITIES; ++i) {
+  for (int i = 0; i < num_entities; ++i) {
     if (!InputShootNodes[i]) continue;
     RecvShootC* recvShootC = &recvShootCData[i];
     PositionC* positionC = &positionCData[i];
@@ -339,7 +340,7 @@ bool checkInputDebugNode(Entity e) {
   return (recvDebugCData[e].initd);
 }
 void processInputDebug(const Uint8* state) {
-  for (int i = 0; i < MAX_ENTITIES; ++i) {
+  for (int i = 0; i < num_entities; ++i) {
     if (!InputDebugNodes[i]) continue;
     // RecvDebugC* recvDebugC = &recvDebugCData[i];
 
@@ -356,14 +357,14 @@ bool checkCollideNode(Entity e) {
        && collideCData[e].initd);
 }
 void processCollide(void) {
-  for (int i = 0; i < MAX_ENTITIES; ++i) {
+  for (int i = 0; i < num_entities; ++i) {
     if (!CollideNodes[i]) continue;
     PositionC* iPositionC = &positionCData[i];
     CollideC* iCollideC = &collideCData[i];
     SDL_Rect iRect = iCollideC->rect;
     iRect.x += iPositionC->x;
     iRect.y += iPositionC->y;
-    for (int j = i+1; j < MAX_ENTITIES; ++j) {
+    for (int j = i+1; j < num_entities; ++j) {
       if (!CollideNodes[j]) continue;
       PositionC* jPositionC = &positionCData[j];
       CollideC* jCollideC = &collideCData[j];
@@ -373,32 +374,43 @@ void processCollide(void) {
 
       if (SDL_HasIntersection(&iRect, &jRect) != SDL_TRUE) continue;
 
-      if (iCollideC->type == COLLIDE_SHIP && jCollideC->type == COLLIDE_ASTEROID) {
+      int iT = iCollideC->type;
+      int jT = jCollideC->type;
+      if (iT == COLLIDE_SHIP && (jT == COLLIDE_ASTEROID || jT == COLLIDE_BIG_ASTEROID)) {
         deregisterEntity(i);
-      } else if (iCollideC->type == COLLIDE_ASTEROID && jCollideC->type == COLLIDE_SHIP) {
+      } else if ((iT == COLLIDE_ASTEROID || iT == COLLIDE_BIG_ASTEROID) && jT == COLLIDE_SHIP) {
         deregisterEntity(j);
 
-      } else if (iCollideC->type == COLLIDE_BULLET && jCollideC->type == COLLIDE_ASTEROID) {
+      } else if (iT == COLLIDE_BULLET && jT == COLLIDE_ASTEROID) {
         deregisterEntity(i);
         deregisterEntity(j);
-      } else if (iCollideC->type == COLLIDE_ASTEROID && jCollideC->type == COLLIDE_BULLET) {
+      } else if (iT == COLLIDE_ASTEROID && jT == COLLIDE_BULLET) {
         deregisterEntity(i);
         deregisterEntity(j);
 
-      } else if (iCollideC->type == COLLIDE_ASTEROID && jCollideC->type == COLLIDE_ASTEROID) {
-        // hacky
-        VelocityC* iVelocityC = &velocityCData[i];
-        VelocityC* jVelocityC = &velocityCData[j];
-        assert(iVelocityC->initd && jVelocityC->initd);
+      } else if (iT == COLLIDE_BULLET && jT == COLLIDE_BIG_ASTEROID) {
+        deregisterEntity(i);
+        AsteroidSplit(j);
+        deregisterEntity(j);
+      } else if (iT == COLLIDE_BIG_ASTEROID && jT == COLLIDE_BULLET) {
+        AsteroidSplit(i);
+        deregisterEntity(i);
+        deregisterEntity(j);
 
-        iPositionC->x -= iVelocityC->dx;
-        iPositionC->y -= iVelocityC->dy;
-        float tempX = jVelocityC->dx;
-        float tempY = jVelocityC->dy;
-        jVelocityC->dx = iVelocityC->dx;
-        jVelocityC->dy = iVelocityC->dy;
-        iVelocityC->dx = tempX;
-        iVelocityC->dy = tempY;
+      } else if ((iT == COLLIDE_ASTEROID || iT == COLLIDE_BIG_ASTEROID) && (jT == COLLIDE_ASTEROID || jT == COLLIDE_BIG_ASTEROID)) {
+        // // hacky
+        // VelocityC* iVelocityC = &velocityCData[i];
+        // VelocityC* jVelocityC = &velocityCData[j];
+        // assert(iVelocityC->initd && jVelocityC->initd);
+
+        // iPositionC->x -= iVelocityC->dx;
+        // iPositionC->y -= iVelocityC->dy;
+        // float tempX = jVelocityC->dx;
+        // float tempY = jVelocityC->dy;
+        // jVelocityC->dx = iVelocityC->dx;
+        // jVelocityC->dy = iVelocityC->dy;
+        // iVelocityC->dx = tempX;
+        // iVelocityC->dy = tempY;
       }
     }
   }
@@ -409,7 +421,7 @@ void processCollide(void) {
 //
 
 Entity preregisterEntity(void) {
-  printf("num_entities: %d\n", num_entities);
+  // printf("num_entities: %d\n", num_entities);
   // returns -1 if no entity slots left
   if (num_entities >= MAX_ENTITIES) {
     return -1;
@@ -525,6 +537,24 @@ void ZeroECS(void) {
 // Game
 //
 
+Entity cloneEntity(Entity e) {
+  Entity e2 = preregisterEntity();
+  attachCollideC(e2, collideCData[e]);
+  attachDisplayC(e2, displayCData[e]);
+  attachDisplayBulletC(e2, displayBulletCData[e]);
+  attachPositionC(e2, positionCData[e]);
+  attachRecvMoveC(e2, recvMoveCData[e]);
+  // RecvShootC data = recvShootCData[e];
+  // memprint(&data, sizeof(data));
+  // printf("initd=%d\n", data.initd);
+  attachRecvShootC(e2, recvShootCData[e]);
+  attachRecvDebugC(e2, recvDebugCData[e]);
+  attachVelocityC(e2, velocityCData[e]);
+  registerEntity(e2);
+  // printf("e2=%d\n", e2);
+  return e2;
+}
+
 Entity player;
 void InitGame(void) {
   ZeroECS();
@@ -573,13 +603,36 @@ Entity ECSAsteroidCreate(void) {
 
   // attach components
   attachPositionC(e, (PositionC){.x=x, .y=y, .t=randInt(360)});
-  attachVelocityC(e, (VelocityC){.dx=randIntIn(-5, 6), .dy=randIntIn(-5, 6), .dt=randIntIn(-5, 6), .wrap=true});
-  attachDisplayC(e, (DisplayC){.tex=asteroidTex});
-  attachCollideC(e, (CollideC){.rect=CollisionMask(asteroidTex, 2), .type=COLLIDE_ASTEROID});
+  if (randInt(100) < 20) {
+    initBigAsteroid(e);
+  } else {
+    initSmallAsteroid(e);
+  }
 
   registerEntity(e);
   return e;
 }
+
+void initSmallAsteroid(Entity e) {
+  attachVelocityC(e, (VelocityC){.dx=randIntIn(-5, 6), .dy=randIntIn(-5, 6), .dt=randIntIn(-5, 6), .wrap=true});
+  attachDisplayC(e, (DisplayC){.tex=asteroidTex});
+  attachCollideC(e, (CollideC){.rect=CollisionMask(asteroidTex, 2), .type=COLLIDE_ASTEROID});
+}
+
+void initBigAsteroid(Entity e) {
+  attachVelocityC(e, (VelocityC){.dx=randIntIn(-2, 3), .dy=randIntIn(-2, 3), .dt=randIntIn(-2, 3), .wrap=true});
+  attachDisplayC(e, (DisplayC){.tex=asteroidBigTex});
+  attachCollideC(e, (CollideC){.rect=CollisionMask(asteroidBigTex, 2), .type=COLLIDE_BIG_ASTEROID});
+}
+
+void AsteroidSplit(Entity e) {
+  int num_children = randIntIn(2, 5);
+  for (int i = 0; i < num_children; ++i) {
+    Entity child = cloneEntity(e);
+    initSmallAsteroid(child);
+  }
+}
+
 
 Entity ECSBulletCreate(float x, float y, float dx, float dy) {
   Entity e = preregisterEntity();
