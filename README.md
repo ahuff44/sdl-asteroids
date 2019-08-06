@@ -5,6 +5,13 @@ This is a toy project to learn about SDL / Emscripten / WebAssembly / ECS
 Shoutouts to http://lazyfoo.net/tutorials/SDL/index.php, which has been a very
 helpful guide while learning SDL.
 
+## External Dependencies
+
+* makeheaders
+* clang
+* emscripten
+* python2.7
+
 ## Local (C) Dev instructions
 
 ```

@@ -15,7 +15,7 @@ OFILE_EM = "out/index.html"
 SHELL_FILE = "src/shell.html"
 HEADERS = "src/headers.h"
 
-MAKEHEADERS = "./lib/makeheaders -h src/*.c > {HEADERS}".format(**locals())
+MAKEHEADERS = "makeheaders -h src/*.c > {HEADERS}".format(**locals())
 COMPILE_C = "clang {ENTRYPOINT} -o {OFILE_C} -Wall -I ~/Library/Frameworks/SDL2.framework/Headers -I ~/Library/Frameworks/SDL2_image.framework/Headers -I ~/Library/Frameworks/SDL2_mixer.framework/Headers -I ~/Library/Frameworks/SDL2_ttf.framework/Headers -F ~/Library/Frameworks -framework SDL2 -framework SDL2_Image -framework SDL2_Mixer -framework SDL2_TTF".format(**locals())
 COMPILE_EM = "emcc {ENTRYPOINT} -o {OFILE_EM} -Wall --preload-file data --use-preload-plugins --shell-file {SHELL_FILE} -s WASM=1 -s EXIT_RUNTIME=1 -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s TOTAL_MEMORY=512MB".format(**locals())
 RUN_C = "DEBUG=1 {OFILE_C}".format(**locals())
