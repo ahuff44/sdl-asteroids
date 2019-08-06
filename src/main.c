@@ -5,8 +5,8 @@
 #include <math.h>
 #include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_mixer.h>
-#include <SDL_ttf.h>
+// #include <SDL_mixer.h>
+// #include <SDL_ttf.h>
 #ifdef __EMSCRIPTEN__
   #include <emscripten/emscripten.h>
 #endif
