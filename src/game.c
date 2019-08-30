@@ -322,12 +322,6 @@ void processMove(void) {
 }
 
 bool checkInputMoveNode(Entity e) {
-  bool res = checkInputMoveNode_(e);
-  printf("checkInputMoveNode(%d)=%d (collideC: %s)\n", e, res, sprintCollideC(collideCData[e]));
-  return res;
-}
-
-bool checkInputMoveNode_(Entity e) {
   ASSERT_VALID_ENTITIY(e);
   return (recvMoveCData[e].initd
        && positionCData[e].initd
@@ -368,8 +362,7 @@ void processInputShoot(const Uint8* state) {
   const int SHOOT_COOLDOWN = 10; // frames
 
   for (int i = 0; i < num_entities; ++i) {
-    // if (!InputShootNodes[i]) continue;
-    if (!checkInputShootNode((Entity)i)) continue;
+    if (!InputShootNodes[i]) continue;
     RecvShootC* recvShootC = &recvShootCData[i];
     PositionC* positionC = &positionCData[i];
 
@@ -472,7 +465,7 @@ void processCollide(void) {
 //
 
 Entity preregisterEntity(void) {
-  printf("preregistering %d\n", num_entities);
+  // printf("preregistering %d\n", num_entities);
   // returns -1 if no entity slots left
   if (num_entities >= MAX_ENTITIES) {
     return -1;
@@ -488,20 +481,9 @@ void registerEntity(Entity e) {
   DisplayBulletNodes[e] = checkDisplayBulletNode(e);
   MoveNodes[e] = checkMoveNode(e);
   InputMoveNodes[e] = checkInputMoveNode(e);
-  bool is = InputShootNodes[e] = checkInputShootNode(e);
+  InputShootNodes[e] = checkInputShootNode(e);
   InputDebugNodes[e] = checkInputDebugNode(e);
   CollideNodes[e] = checkCollideNode(e);
-  if (is) {
-    printf("registerEntity(%d):\n", e);
-    printf("  checkDisplayDebugNode(-) = %d\n", DisplayDebugNodes[e]);
-    printf("  checkDisplayNode(-) = %d\n", DisplayNodes[e]);
-    printf("  checkDisplayBulletNode(-) = %d\n", DisplayBulletNodes[e]);
-    printf("  checkMoveNode(-) = %d\n", MoveNodes[e]);
-    printf("  checkInputMoveNode(-) = %d\n", InputMoveNodes[e]);
-    printf("  checkInputShootNode(-) = %d\n", InputShootNodes[e]);
-    printf("  checkInputDebugNode(-) = %d\n", InputDebugNodes[e]);
-    printf("  checkCollideNode(-) = %d\n", CollideNodes[e]);
-  }
 }
 
 Entity* toKill = NULL;
@@ -520,7 +502,6 @@ void deregisterEntity(Entity e) {
 }
 void _deregisterEntityFRD(Entity e) {
   ASSERT_VALID_ENTITIY(e);
-  bool res1 = checkInputShootNode(e);
 
   // zero out components
   collideCData[e] = (CollideC){0};
@@ -531,7 +512,6 @@ void _deregisterEntityFRD(Entity e) {
   recvShootCData[e] = (RecvShootC){0};
   recvDebugCData[e] = (RecvDebugC){0};
   velocityCData[e] = (VelocityC){0};
-  bool res2 = checkInputShootNode(e);
 
   // zero out nodes
   DisplayDebugNodes[e] = false;
@@ -542,8 +522,6 @@ void _deregisterEntityFRD(Entity e) {
   InputShootNodes[e] = false;
   InputDebugNodes[e] = false;
   CollideNodes[e] = false;
-  bool res3 = checkInputShootNode(e);
-  printf("checkInputShootNode(%d)=%d / %d / %d\n", e, res1, res2, res3);
 }
 void _deregisterFRD(void) {
   for (size_t i = 0; i < buf_len(toKill); ++i) {
