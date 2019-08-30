@@ -373,7 +373,9 @@ void processInputShoot(const Uint8* state) {
         double pi = acos(-1);
         float dx = 10*cos(positionC->t * (pi/180));
         float dy = 10*sin(positionC->t * (pi/180));
-        ECSBulletCreate(positionC->x, positionC->y, dx, dy);
+        Entity e = preregisterEntity();
+        initBullet(e, positionC->x, positionC->y, dx, dy);
+        registerEntity(e);
       }
     }
   }
@@ -474,7 +476,7 @@ Entity preregisterEntity(void) {
   }
 }
 
-void registerEntity(Entity e) {
+Entity registerEntity(Entity e) {
   ASSERT_VALID_ENTITIY(e);
   DisplayDebugNodes[e] = checkDisplayDebugNode(e);
   DisplayNodes[e] = checkDisplayNode(e);
@@ -484,6 +486,7 @@ void registerEntity(Entity e) {
   InputShootNodes[e] = checkInputShootNode(e);
   InputDebugNodes[e] = checkInputDebugNode(e);
   CollideNodes[e] = checkCollideNode(e);
+  return e;
 }
 
 Entity* toKill = NULL;
@@ -581,8 +584,7 @@ void ZeroECS(void) {
 // Game
 //
 
-Entity cloneEntity(Entity e) {
-  Entity e2 = preregisterEntity();
+Entity cloneEntity(Entity e2, Entity e) {
   if (collideCData[e].initd) attachCollideC(e2, collideCData[e]);
   if (displayCData[e].initd) attachDisplayC(e2, displayCData[e]);
   if (displayBulletCData[e].initd) attachDisplayBulletC(e2, displayBulletCData[e]);
@@ -591,44 +593,43 @@ Entity cloneEntity(Entity e) {
   if (recvShootCData[e].initd) attachRecvShootC(e2, recvShootCData[e]);
   if (recvDebugCData[e].initd) attachRecvDebugC(e2, recvDebugCData[e]);
   if (velocityCData[e].initd) attachVelocityC(e2, velocityCData[e]);
-  registerEntity(e2); // TODO maybe don't auto-do this?
   return e2;
 }
 
 Entity player;
 void InitGame(void) {
   ZeroECS();
-  ECSDebugCreate();
+  registerEntity(initDebugE(preregisterEntity()));
 
-  player = ECSPlayerCreate();
-  for (int i = 0; i < 10; ++i) {
-    ECSAsteroidCreate();
+  player = registerEntity(initPlayerE(preregisterEntity()));
+
+  int num;
+  num = randIntIn(6, 9);
+  for (int i = 0; i < num; ++i) {
+    registerEntity(initBigAsteroidE(preregisterEntity()));
+  }
+  num = randIntIn(2, 5);
+  for (int i = 0; i < num; ++i) {
+    registerEntity(initSmallAsteroidE(preregisterEntity()));
   }
 }
 
-Entity ECSDebugCreate(void) {
-  Entity e = preregisterEntity();
+Entity initDebugE(Entity e) {
   attachRecvDebugC(e, (RecvDebugC){});
-  registerEntity(e);
   return e;
 }
 
-Entity ECSPlayerCreate(void) {
-  Entity e = preregisterEntity();
+Entity initPlayerE(Entity e) {
   attachPositionC(e, (PositionC){.x=SCREEN_WIDTH/2, .y=SCREEN_HEIGHT/2, .t=0});
   attachVelocityC(e, (VelocityC){.dx=0, .dy=0, .dt=0, .wrap=true});
   attachDisplayC(e, (DisplayC){.tex=shipTex});
   attachCollideC(e, (CollideC){.rect=CollisionMask(shipTex, 12), .type=COLLIDE_SHIP});
   attachRecvMoveC(e, (RecvMoveC){});
   attachRecvShootC(e, (RecvShootC){});
-  registerEntity(e);
   return e;
 }
 
-Entity ECSAsteroidCreate(void) {
-  Entity e = preregisterEntity();
-
-  // figure out position
+void attachPosAwayFromPlayer(Entity e) {
   PositionC* playerPositionC = &positionCData[player];
   assert(playerPositionC->initd);
 
@@ -640,43 +641,38 @@ Entity ECSAsteroidCreate(void) {
   } while (
     taxicabDist(x, y, playerPositionC->x, playerPositionC->y) < 300
   );
-
   // attach components
-  attachPositionC(e, (PositionC){.x=x, .y=y, .t=randInt(360)});
-  if (randInt(100) < 20) {
-    initBigAsteroid(e);
-  } else {
-    initSmallAsteroid(e);
-  }
-
-  registerEntity(e);
-  return e;
+  attachPositionC(e, (PositionC){.x=x, .y=y, .t=randInt(360)});;
 }
 
-void initSmallAsteroid(Entity e) {
+Entity initSmallAsteroidE(Entity e) {
+  attachPosAwayFromPlayer(e);
   attachVelocityC(e, (VelocityC){.dx=randIntIn(-5, 6), .dy=randIntIn(-5, 6), .dt=randIntIn(-5, 6), .wrap=true});
   attachDisplayC(e, (DisplayC){.tex=asteroidTex});
   attachCollideC(e, (CollideC){.rect=CollisionMask(asteroidTex, 2), .type=COLLIDE_ASTEROID});
+  return e;
 }
 
-void initBigAsteroid(Entity e) {
+Entity initBigAsteroidE(Entity e) {
+  attachPosAwayFromPlayer(e);
   attachVelocityC(e, (VelocityC){.dx=randIntIn(-2, 3), .dy=randIntIn(-2, 3), .dt=randIntIn(-2, 3), .wrap=true});
   attachDisplayC(e, (DisplayC){.tex=asteroidBigTex});
   attachCollideC(e, (CollideC){.rect=CollisionMask(asteroidBigTex, 2), .type=COLLIDE_BIG_ASTEROID});
+  return e;
 }
 
 void AsteroidSplit(Entity e) {
   int num_children = randIntIn(2, 5);
   for (int i = 0; i < num_children; ++i) {
-    Entity child = cloneEntity(e);
-    initSmallAsteroid(child);
+    Entity child = preregisterEntity();
+    initSmallAsteroidE(child);
+    attachPositionC(child, positionCData[e]);
     registerEntity(child);
   }
 }
 
 
-Entity ECSBulletCreate(float x, float y, float dx, float dy) {
-  Entity e = preregisterEntity();
+Entity initBullet(Entity e, float x, float y, float dx, float dy) {
   attachPositionC(e, (PositionC){.x=x, .y=y, .t=0});
   attachVelocityC(e, (VelocityC){.dx=dx, .dy=dy, .dt=0, .wrap=false});
 
@@ -688,6 +684,5 @@ Entity ECSBulletCreate(float x, float y, float dx, float dy) {
 
   attachCollideC(e, (CollideC){.rect=rect, .type=COLLIDE_BULLET});
   attachDisplayBulletC(e, (DisplayBulletC){});
-  registerEntity(e);
   return e;
 }
