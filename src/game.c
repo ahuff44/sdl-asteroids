@@ -116,18 +116,6 @@ struct VelocityC {
 };
 #endif
 
-Arena TempStorage;
-char* stringTalloc(char* ptr, int n) {
-  // takes ptr and returns a pointer that points to a permanent copy of the string
-  // (allocated in TempStorage)
-  assert(strlen(ptr) == n);
-  void* newptr = arena_alloc(&TempStorage, n+1)
-  memcpy(newptr, ptr, n+1);
-  return (char *)newptr;
-}
-
-const int SPRINT_BUFFER_SIZE = 1024*2;
-char sprintBuffer[SPRINT_BUFFER_SIZE];
 char* sprintCollisionType(CollisionType x) {
   switch (x) {
     case COLLIDE_NONE: return "COLLIDE_NONE";
@@ -139,11 +127,37 @@ char* sprintCollisionType(CollisionType x) {
   }
 }
 char* sprintCollideC(CollideC x) {
-  char* ptr;
-  int n = sprintf(ptr, "(CollideC){ initd: %d, rect: %s }", x.initd, "<SDL_Rect>", sprintCollisionType(x.type));
-  char* newptr = stringTalloc(ptr, n);
-  return newptr;
+  return strf("(CollideC){ initd: %d, rect: %s, type: %s }", x.initd, "<SDL_Rect>", sprintCollisionType(x.type));
 }
+
+char* sprintDisplayC(DisplayC x) {
+  return strf("(DisplayC){ initd: %d, tex: %s }", x.initd, "<Texture>");
+}
+
+char* sprintDisplayBulletC(DisplayBulletC x) {
+  return strf("(DisplayBulletC){ initd: %d }", x.initd);
+}
+
+char* sprintPositionC(PositionC x) {
+  return strf("(PositionC){ initd: %d, x: %.2f, y: %.2f, t: %.2f }", x.initd, x.x, x.y, x.t);
+}
+
+char* sprintRecvMoveC(RecvMoveC x) {
+  return strf("(RecvMoveC){ initd: %d }", x.initd);
+}
+
+char* sprintRecvShootC(RecvShootC x) {
+  return strf("(RecvShootC){ initd: %d, cooldown: %d }", x.initd, x.cooldown);
+}
+
+char* sprintRecvDebugC(RecvDebugC x) {
+  return strf("(RecvDebugC){ initd: %d }", x.initd);
+}
+
+char* sprintVelocityC(VelocityC x) {
+  return strf("(VelocityC){ initd: %d, dx: %.2f, dy: %.2f, dt: %.2f, wrap: %d }", x.initd, x.dx, x.dy, x.dt, x.wrap);
+}
+
 
 CollideC collideCData[MAX_ENTITIES];
 DisplayC displayCData[MAX_ENTITIES];

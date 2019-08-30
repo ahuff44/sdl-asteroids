@@ -16,7 +16,7 @@ SDL_Renderer* renderer = NULL;
 
 #include "constants.h"
 #include "headers.h"
-#include "buf.c"
+#include "ion.c"
 #include "util.c"
 // #include "map.c"
 #include "media.c"

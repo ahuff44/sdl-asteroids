@@ -25,7 +25,7 @@ options = {
   "all": "{MAKEHEADERS} && {COMPILE_C} && {RUN_C}".format(**locals()),
 
   "clean": "{CLEAN}".format(**locals()),
-  "compile": "{COMPILE_C}".format(**locals()),
+  "compile": "{MAKEHEADERS} && {COMPILE_C}".format(**locals()),
   "emscripten": "{COMPILE_EM}".format(**locals()),
   "headers": "{MAKEHEADERS}".format(**locals()),
   "lint": "{COMPILE_C} --analyze".format(**locals()),

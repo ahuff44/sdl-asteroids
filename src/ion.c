@@ -2,6 +2,7 @@
 // steps to recreate this file:
 //   copy from url
 //   add some `#if INTERFACE` ifdefs around Arena and Map
+//   comment out strf() (re-defined in util.c)
 
 #define MIN(x, y) ((x) <= (y) ? (x) : (y))
 #define MAX(x, y) ((x) >= (y) ? (x) : (y))
@@ -56,17 +57,17 @@ void *memdup(void *src, size_t size) {
     return dest;
 }
 
-char *strf(const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    size_t n = 1 + vsnprintf(NULL, 0, fmt, args);
-    va_end(args);
-    char *str = xmalloc(n);
-    va_start(args, fmt);
-    vsnprintf(str, n, fmt, args);
-    va_end(args);
-    return str;
-}
+// char *strf(const char *fmt, ...) {
+//     va_list args;
+//     va_start(args, fmt);
+//     size_t n = 1 + vsnprintf(NULL, 0, fmt, args);
+//     va_end(args);
+//     char *str = xmalloc(n);
+//     va_start(args, fmt);
+//     vsnprintf(str, n, fmt, args);
+//     va_end(args);
+//     return str;
+// }
 
 char *read_file(const char *path) {
     FILE *file = fopen(path, "rb");
