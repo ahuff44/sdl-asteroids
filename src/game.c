@@ -127,35 +127,35 @@ char* sprintCollisionType(CollisionType x) {
   }
 }
 char* sprintCollideC(CollideC x) {
-  return strf("(CollideC){ initd: %d, rect: %s, type: %s }", x.initd, "<SDL_Rect>", sprintCollisionType(x.type));
+  return strf("(CollideC){ .initd=%d, .rect=%s, .type=%s }", x.initd, "<SDL_Rect>", sprintCollisionType(x.type));
 }
 
 char* sprintDisplayC(DisplayC x) {
-  return strf("(DisplayC){ initd: %d, tex: %s }", x.initd, "<Texture>");
+  return strf("(DisplayC){ .initd=%d, .tex=%s }", x.initd, "<Texture>");
 }
 
 char* sprintDisplayBulletC(DisplayBulletC x) {
-  return strf("(DisplayBulletC){ initd: %d }", x.initd);
+  return strf("(DisplayBulletC){ .initd=%d }", x.initd);
 }
 
 char* sprintPositionC(PositionC x) {
-  return strf("(PositionC){ initd: %d, x: %.2f, y: %.2f, t: %.2f }", x.initd, x.x, x.y, x.t);
+  return strf("(PositionC){ .initd=%d, .x=%.2f, .y=%.2f, .t=%.2f }", x.initd, x.x, x.y, x.t);
 }
 
 char* sprintRecvMoveC(RecvMoveC x) {
-  return strf("(RecvMoveC){ initd: %d }", x.initd);
+  return strf("(RecvMoveC){ .initd=%d }", x.initd);
 }
 
 char* sprintRecvShootC(RecvShootC x) {
-  return strf("(RecvShootC){ initd: %d, cooldown: %d }", x.initd, x.cooldown);
+  return strf("(RecvShootC){ .initd=%d, .cooldown=%d }", x.initd, x.cooldown);
 }
 
 char* sprintRecvDebugC(RecvDebugC x) {
-  return strf("(RecvDebugC){ initd: %d }", x.initd);
+  return strf("(RecvDebugC){ .initd=%d }", x.initd);
 }
 
 char* sprintVelocityC(VelocityC x) {
-  return strf("(VelocityC){ initd: %d, dx: %.2f, dy: %.2f, dt: %.2f, wrap: %d }", x.initd, x.dx, x.dy, x.dt, x.wrap);
+  return strf("(VelocityC){ .initd=%d, .dx=%.2f, .dy=%.2f, .dt=%.2f, .wrap=%d }", x.initd, x.dx, x.dy, x.dt, x.wrap);
 }
 
 
@@ -322,8 +322,13 @@ void processMove(void) {
 }
 
 bool checkInputMoveNode(Entity e) {
+  bool res = checkInputMoveNode_(e);
+  printf("checkInputMoveNode(%d)=%d (collideC: %s)\n", e, res, sprintCollideC(collideCData[e]));
+  return res;
+}
+
+bool checkInputMoveNode_(Entity e) {
   ASSERT_VALID_ENTITIY(e);
-  printf("%s\n", sprintCollideC(collideCData[e]));
   return (recvMoveCData[e].initd
        && positionCData[e].initd
        && velocityCData[e].initd);
@@ -478,14 +483,25 @@ Entity preregisterEntity(void) {
 
 void registerEntity(Entity e) {
   ASSERT_VALID_ENTITIY(e);
-  if (checkDisplayDebugNode(e)) { DisplayDebugNodes[e] = true; }
-  if (checkDisplayNode(e)) { DisplayNodes[e] = true; }
-  if (checkDisplayBulletNode(e)) { DisplayBulletNodes[e] = true; }
-  if (checkMoveNode(e)) { MoveNodes[e] = true; }
-  if (checkInputMoveNode(e)) { InputMoveNodes[e] = true; }
-  if (checkInputShootNode(e)) { InputShootNodes[e] = true; }
-  if (checkInputDebugNode(e)) { InputDebugNodes[e] = true; }
-  if (checkCollideNode(e)) { CollideNodes[e] = true; }
+  DisplayDebugNodes[e] = checkDisplayDebugNode(e);
+  DisplayNodes[e] = checkDisplayNode(e);
+  DisplayBulletNodes[e] = checkDisplayBulletNode(e);
+  MoveNodes[e] = checkMoveNode(e);
+  InputMoveNodes[e] = checkInputMoveNode(e);
+  bool is = InputShootNodes[e] = checkInputShootNode(e);
+  InputDebugNodes[e] = checkInputDebugNode(e);
+  CollideNodes[e] = checkCollideNode(e);
+  if (is) {
+    printf("registerEntity(%d):\n", e);
+    printf("  checkDisplayDebugNode(-) = %d\n", DisplayDebugNodes[e]);
+    printf("  checkDisplayNode(-) = %d\n", DisplayNodes[e]);
+    printf("  checkDisplayBulletNode(-) = %d\n", DisplayBulletNodes[e]);
+    printf("  checkMoveNode(-) = %d\n", MoveNodes[e]);
+    printf("  checkInputMoveNode(-) = %d\n", InputMoveNodes[e]);
+    printf("  checkInputShootNode(-) = %d\n", InputShootNodes[e]);
+    printf("  checkInputDebugNode(-) = %d\n", InputDebugNodes[e]);
+    printf("  checkCollideNode(-) = %d\n", CollideNodes[e]);
+  }
 }
 
 Entity* toKill = NULL;
@@ -493,11 +509,6 @@ void _frameDeregisterInit(void) {
   buf_clear(toKill);
 }
 bool alreadyKilled(Entity e) {
-  bool res = alreadyKilled_(e);
-  printf("alreadyKilled(%d)=%d\n", e, res);
-  return res;
-}
-bool alreadyKilled_(Entity e) {
   for (size_t i = 0; i < buf_len(toKill); ++i) {
     if (toKill[i] == e) return true;
   }
@@ -594,19 +605,15 @@ void ZeroECS(void) {
 
 Entity cloneEntity(Entity e) {
   Entity e2 = preregisterEntity();
-  attachCollideC(e2, collideCData[e]);
-  attachDisplayC(e2, displayCData[e]);
-  attachDisplayBulletC(e2, displayBulletCData[e]);
-  attachPositionC(e2, positionCData[e]);
-  attachRecvMoveC(e2, recvMoveCData[e]);
-  // RecvShootC data = recvShootCData[e];
-  // memprint(&data, sizeof(data));
-  // printf("initd=%d\n", data.initd);
-  attachRecvShootC(e2, recvShootCData[e]);
-  attachRecvDebugC(e2, recvDebugCData[e]);
-  attachVelocityC(e2, velocityCData[e]);
-  registerEntity(e2);
-  // printf("e2=%d\n", e2);
+  if (collideCData[e].initd) attachCollideC(e2, collideCData[e]);
+  if (displayCData[e].initd) attachDisplayC(e2, displayCData[e]);
+  if (displayBulletCData[e].initd) attachDisplayBulletC(e2, displayBulletCData[e]);
+  if (positionCData[e].initd) attachPositionC(e2, positionCData[e]);
+  if (recvMoveCData[e].initd) attachRecvMoveC(e2, recvMoveCData[e]);
+  if (recvShootCData[e].initd) attachRecvShootC(e2, recvShootCData[e]);
+  if (recvDebugCData[e].initd) attachRecvDebugC(e2, recvDebugCData[e]);
+  if (velocityCData[e].initd) attachVelocityC(e2, velocityCData[e]);
+  registerEntity(e2); // TODO maybe don't auto-do this?
   return e2;
 }
 
@@ -685,6 +692,7 @@ void AsteroidSplit(Entity e) {
   for (int i = 0; i < num_children; ++i) {
     Entity child = cloneEntity(e);
     initSmallAsteroid(child);
+    registerEntity(child);
   }
 }
 
