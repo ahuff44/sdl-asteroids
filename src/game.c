@@ -486,6 +486,17 @@ Entity registerEntity(Entity e) {
   InputShootNodes[e] = checkInputShootNode(e);
   InputDebugNodes[e] = checkInputDebugNode(e);
   CollideNodes[e] = checkCollideNode(e);
+
+  // printf("registerEntity(%d):\n", e);
+  // printf("  CollideC[-]=%s\n", sprintCollideC(collideCData[e]));
+  // printf("  DisplayC[-]=%s\n", sprintDisplayC(displayCData[e]));
+  // printf("  DisplayBulletC[-]=%s\n", sprintDisplayBulletC(displayBulletCData[e]));
+  // printf("  PositionC[-]=%s\n", sprintPositionC(positionCData[e]));
+  // printf("  RecvMoveC[-]=%s\n", sprintRecvMoveC(recvMoveCData[e]));
+  // printf("  RecvShootC[-]=%s\n", sprintRecvShootC(recvShootCData[e]));
+  // printf("  RecvDebugC[-]=%s\n", sprintRecvDebugC(recvDebugCData[e]));
+  // printf("  VelocityC[-]=%s\n", sprintVelocityC(velocityCData[e]));
+
   return e;
 }
 

@@ -3,6 +3,7 @@
 //   copy from url
 //   add some `#if INTERFACE` ifdefs around Arena and Map
 //   comment out strf() (re-defined in util.c)
+//   add size code to Arena
 
 #define MIN(x, y) ((x) <= (y) ? (x) : (y))
 #define MAX(x, y) ((x) >= (y) ? (x) : (y))
@@ -179,6 +180,7 @@ void buf_test(void) {
 
 #if INTERFACE
 typedef struct Arena {
+    size_t size;
     char *ptr;
     char *end;
     char **blocks;
@@ -192,6 +194,7 @@ typedef struct Arena {
 void arena_grow(Arena *arena, size_t min_size) {
     size_t size = ALIGN_UP(CLAMP_MIN(min_size, ARENA_BLOCK_SIZE), ARENA_ALIGNMENT);
     arena->ptr = xmalloc(size);
+    arena->size += size;
     assert(arena->ptr == ALIGN_DOWN_PTR(arena->ptr, ARENA_ALIGNMENT));
     arena->end = arena->ptr + size;
     buf_push(arena->blocks, arena->ptr);

@@ -54,12 +54,18 @@ void memprint(size_t start, size_t len) {
 
 Arena TempStorage;
 
-char *strf(const char *fmt, ...) {
+void* temp_alloc(size_t n) {
+  void* res = arena_alloc(&TempStorage, n);
+  // printf("TempStorage->size=%zu\n", TempStorage.size);
+  return res;
+}
+
+char* strf(const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
   size_t n = 1 + vsnprintf(NULL, 0, fmt, args);
   va_end(args);
-  char* str = (char *)arena_alloc(&TempStorage, n);
+  char* str = (char *)temp_alloc(n);
   va_start(args, fmt);
   vsnprintf(str, n, fmt, args);
   va_end(args);
