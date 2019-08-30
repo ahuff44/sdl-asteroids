@@ -16,9 +16,9 @@ SDL_Renderer* renderer = NULL;
 
 #include "constants.h"
 #include "headers.h"
-#include "util.c"
 #include "buf.c"
-#include "map.c"
+#include "util.c"
+// #include "map.c"
 #include "media.c"
 #include "game.c"
 

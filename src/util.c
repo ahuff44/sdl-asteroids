@@ -1,10 +1,6 @@
 #include <time.h>
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
-#define MIN(x, y) ((x) <= (y) ? (x) : (y))
-#define MAX(x, y) ((x) >= (y) ? (x) : (y))
-#define CLAMP_MAX(x, max) MIN(x, max)
-#define CLAMP_MIN(x, min) MAX(x, min)
 
 void InitRNG(void) {
   srand(time(NULL));

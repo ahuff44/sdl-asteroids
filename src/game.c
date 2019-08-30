@@ -116,6 +116,35 @@ struct VelocityC {
 };
 #endif
 
+Arena TempStorage;
+char* stringTalloc(char* ptr, int n) {
+  // takes ptr and returns a pointer that points to a permanent copy of the string
+  // (allocated in TempStorage)
+  assert(strlen(ptr) == n);
+  void* newptr = arena_alloc(&TempStorage, n+1)
+  memcpy(newptr, ptr, n+1);
+  return (char *)newptr;
+}
+
+const int SPRINT_BUFFER_SIZE = 1024*2;
+char sprintBuffer[SPRINT_BUFFER_SIZE];
+char* sprintCollisionType(CollisionType x) {
+  switch (x) {
+    case COLLIDE_NONE: return "COLLIDE_NONE";
+    case COLLIDE_SHIP: return "COLLIDE_SHIP";
+    case COLLIDE_ASTEROID: return "COLLIDE_ASTEROID";
+    case COLLIDE_BIG_ASTEROID: return "COLLIDE_BIG_ASTEROID";
+    case COLLIDE_BULLET: return "COLLIDE_BULLET";
+    default: return "<unknown>";
+  }
+}
+char* sprintCollideC(CollideC x) {
+  char* ptr;
+  int n = sprintf(ptr, "(CollideC){ initd: %d, rect: %s }", x.initd, "<SDL_Rect>", sprintCollisionType(x.type));
+  char* newptr = stringTalloc(ptr, n);
+  return newptr;
+}
+
 CollideC collideCData[MAX_ENTITIES];
 DisplayC displayCData[MAX_ENTITIES];
 DisplayBulletC displayBulletCData[MAX_ENTITIES];
@@ -235,6 +264,7 @@ void processDisplayBullet(void) {
 
   for (int i = 0; i < num_entities; ++i) {
     if (!DisplayBulletNodes[i]) continue;
+    // printf("processDisplayBullet for %d\n", i);
     PositionC* positionC = &positionCData[i];
     VelocityC* velocityC = &velocityCData[i];
     // DisplayBulletC* displayBulletC = &displayBulletCData[i];
@@ -279,6 +309,7 @@ void processMove(void) {
 
 bool checkInputMoveNode(Entity e) {
   ASSERT_VALID_ENTITIY(e);
+  printf("%s\n", sprintCollideC(collideCData[e]));
   return (recvMoveCData[e].initd
        && positionCData[e].initd
        && velocityCData[e].initd);
@@ -318,7 +349,8 @@ void processInputShoot(const Uint8* state) {
   const int SHOOT_COOLDOWN = 10; // frames
 
   for (int i = 0; i < num_entities; ++i) {
-    if (!InputShootNodes[i]) continue;
+    // if (!InputShootNodes[i]) continue;
+    if (!checkInputShootNode((Entity)i)) continue;
     RecvShootC* recvShootC = &recvShootCData[i];
     PositionC* positionC = &positionCData[i];
 
@@ -421,7 +453,7 @@ void processCollide(void) {
 //
 
 Entity preregisterEntity(void) {
-  // printf("num_entities: %d\n", num_entities);
+  printf("preregistering %d\n", num_entities);
   // returns -1 if no entity slots left
   if (num_entities >= MAX_ENTITIES) {
     return -1;
@@ -447,6 +479,11 @@ void _frameDeregisterInit(void) {
   buf_clear(toKill);
 }
 bool alreadyKilled(Entity e) {
+  bool res = alreadyKilled_(e);
+  printf("alreadyKilled(%d)=%d\n", e, res);
+  return res;
+}
+bool alreadyKilled_(Entity e) {
   for (size_t i = 0; i < buf_len(toKill); ++i) {
     if (toKill[i] == e) return true;
   }
@@ -458,6 +495,7 @@ void deregisterEntity(Entity e) {
 }
 void _deregisterEntityFRD(Entity e) {
   ASSERT_VALID_ENTITIY(e);
+  bool res1 = checkInputShootNode(e);
 
   // zero out components
   collideCData[e] = (CollideC){0};
@@ -468,6 +506,7 @@ void _deregisterEntityFRD(Entity e) {
   recvShootCData[e] = (RecvShootC){0};
   recvDebugCData[e] = (RecvDebugC){0};
   velocityCData[e] = (VelocityC){0};
+  bool res2 = checkInputShootNode(e);
 
   // zero out nodes
   DisplayDebugNodes[e] = false;
@@ -478,6 +517,8 @@ void _deregisterEntityFRD(Entity e) {
   InputShootNodes[e] = false;
   InputDebugNodes[e] = false;
   CollideNodes[e] = false;
+  bool res3 = checkInputShootNode(e);
+  printf("checkInputShootNode(%d)=%d / %d / %d\n", e, res1, res2, res3);
 }
 void _deregisterFRD(void) {
   for (size_t i = 0; i < buf_len(toKill); ++i) {
