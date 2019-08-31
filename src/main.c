@@ -6,13 +6,14 @@
 #include <SDL.h>
 #include <SDL_image.h>
 // #include <SDL_mixer.h>
-// #include <SDL_ttf.h>
+#include <SDL_ttf.h>
 #ifdef __EMSCRIPTEN__
   #include <emscripten/emscripten.h>
 #endif
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+TTF_Font *font = NULL;
 
 #include "constants.h"
 #include "headers.h"
@@ -46,6 +47,19 @@ bool initSDL(void) {
     return false;
   }
 
+  if (TTF_Init() < 0) {
+    printf("SDL_ttf error: %s\n", TTF_GetError());
+    printf("Could not initialize SDL_ttf\n");
+    return false;
+  }
+  font = TTF_OpenFont("data/lazy.ttf", 16);
+  if (!font) {
+    printf("SDL_ttf error: %s\n", TTF_GetError());
+    printf("Could not open font\n");
+    return false;
+  }
+
+
   #ifdef __EMSCRIPTEN__
     // skip IMG_Init; see https://github.com/emscripten-ports/SDL2_image/issues/3
   #else
@@ -54,6 +68,7 @@ bool initSDL(void) {
     if (!(IMG_Init(imgFlags) & imgFlags)) {
       printf("SDL_image error: %s\n", IMG_GetError());
       printf("Could not initialize SDL_image\n");
+      return false;
     }
   #endif
 
@@ -67,6 +82,15 @@ void closeGame(void) {
   renderer = NULL;
   SDL_DestroyWindow(window);
   window = NULL;
+
+  TTF_CloseFont(font);
+  font = NULL;
+  TTF_Quit();
+
+  #ifdef __EMSCRIPTEN__
+  #else
+    IMG_Quit();
+  #endif
 
   SDL_Quit();
 }

@@ -45,7 +45,6 @@ source ~/projects/emsdk/emsdk_env.sh
 * Read ECS articles
   https://www.richardlord.net/blog/ecs/
 * Read skipped tutorials
-  * 16 (fonts)
   * 17 (mouse events)
   * 19, 20 (gamepads)
   * 21 (music, current)
@@ -73,3 +72,20 @@ windows issues:
   LINK : fatal error LNK1181: cannot open input file 'SDL2main.lib'
 
   i dunno i give up. maybe i need mingw?
+
+  to try:
+    I saw this in a lazyfoo tutorial; maybe I need SDL2main?
+    ```
+    This project is linked against:
+    ----------------------------------------
+    Windows:
+    SDL2
+    SDL2main
+    SDL2_image
+    SDL2_ttf
+
+    *nix:
+    SDL2
+    SDL2_image
+    SDL2_ttf
+    ```

@@ -7,12 +7,6 @@ struct Texture{
 };
 #endif
 
-// Texture* _TextureAlloc() {
-//   size_t size = sizeof(Texture);
-//   void* ptr = malloc(size);
-//   return ptr;
-// }
-
 const SDL_Color ColorKey = { .r=0xFF, .g=0, .b=0 }; // red
 // const SDL_Color ColorKey = { .r=0, .g=0xFF, .b=0xFF }; // cyan
 
@@ -28,6 +22,16 @@ bool TextureLoad(char* path, Texture *out) {
     printf("Could not apply color key\n");
     return false;
   }
+
+  if (!TextureFromSurface(surface, out)) {
+    printf("Could not convert surface to texture\n");
+    return false;
+  }
+
+  return true;
+}
+
+bool TextureFromSurface(SDL_Surface* surface, Texture *out) {
   SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
   if (texture == NULL) {
     printf("SDL error: %s\n", SDL_GetError());
@@ -37,6 +41,7 @@ bool TextureLoad(char* path, Texture *out) {
 
   *out = (Texture){ .tex=texture, .w=surface->w, .h=surface->h };
   SDL_FreeSurface(surface);
+
   return true;
 }
 
@@ -60,6 +65,32 @@ void TextureRenderEx(Texture tex, int x, int y, SDL_Rect* clip, double angle, SD
     dest.h = clip->h;
   }
   SDL_RenderCopyEx(renderer, tex.tex, clip, &dest, angle, center, flip);
+}
+
+bool RenderText(char* text, int x, int y) {
+  Texture tex;
+  if (!RenderTextToTexture(text, &tex)) {
+    return false;
+  }
+  TextureRender(tex, x, y, NULL);
+  TextureFree(tex);
+  return true;
+}
+
+bool RenderTextToTexture(char* text, Texture *out) {
+  SDL_Color fg = { .r=255, .g=255, .b=255 };
+  SDL_Surface* surface = TTF_RenderText_Solid(font, text, fg);
+  if (surface == NULL) {
+    printf("SDL_ttf error: %s\n", TTF_GetError());
+    printf("Could not render text\n");
+    return false;
+  }
+  if (!TextureFromSurface(surface, out)) {
+    printf("Could not convert surface to texture\n");
+    return false;
+  }
+
+  return true;
 }
 
 Texture asteroidTex;

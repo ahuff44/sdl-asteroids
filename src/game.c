@@ -256,6 +256,7 @@ bool checkDisplayNode(Entity e) {
        && displayCData[e].initd);
 }
 void processDisplay(void) {
+  RenderText("hello", 10, 10);
   for (int i = 0; i < num_entities; ++i) {
     if (!DisplayNodes[i]) continue;
     PositionC* positionC = &positionCData[i];
