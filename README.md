@@ -51,6 +51,13 @@ source ~/projects/emsdk/emsdk_env.sh
 
 ## misc notes
 
+check this out; esp "8. X macros"
+  https://blog.noctua-software.com/c-tricks.html
+other tricks:
+  https://stackoverflow.com/questions/599365/what-is-your-favorite-c-programming-trick
+  this one looks v v useful combined with that one c feature... "generics"?
+    https://stackoverflow.com/a/7400026/2281633
+
 From one the SDL.dmg README (iirc):
  - Screencast tutorials for getting started with OpenSceneGraph/Mac OS X are
   available at:
